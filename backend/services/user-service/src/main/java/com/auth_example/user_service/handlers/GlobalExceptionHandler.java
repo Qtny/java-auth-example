@@ -1,7 +1,7 @@
 package com.auth_example.user_service.handlers;
 
 import com.auth_example.user_service.common.ApiResponse;
-import com.auth_example.user_service.exceptions.ErrorResponse;
+import com.auth_example.user_service.exceptions.DuplicatedEmailException;
 import com.auth_example.user_service.exceptions.UserMfaAlreadyEnabledException;
 import com.auth_example.user_service.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -30,21 +30,34 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.failure(exception.getMessage()));
     }
 
+    @ExceptionHandler(DuplicatedEmailException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicatedEmailException(DuplicatedEmailException exception) {
+        return ResponseEntity
+                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ApiResponse.failure(exception.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException
             (MethodArgumentNotValidException exception)
     {
-        var errors = new HashMap<String, String>();
-        exception.getBindingResult()
-                .getAllErrors()
-                .forEach(error -> {
-                    var fieldName = ((FieldError) error).getField();
-                    var errorMessage = error.getDefaultMessage();
-                    errors.put(fieldName, errorMessage);
-                });
+//        var errors = new HashMap<String, String>();
+//        exception.getBindingResult()
+//                .getAllErrors()
+//                .forEach(error -> {
+//                    var fieldName = ((FieldError) error).getField();
+//                    var errorMessage = error.getDefaultMessage();
+//                    errors.put(fieldName, errorMessage);
+//                });
+        String errorMessage = exception.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse("Invalid input");
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.failure(new ErrorResponse(errors)));
+                .body(ApiResponse.failure(errorMessage));
     }
 }

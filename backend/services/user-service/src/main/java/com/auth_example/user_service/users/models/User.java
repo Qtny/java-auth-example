@@ -12,7 +12,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "users")
+@Table(
+        name = "users",
+        uniqueConstraints = @UniqueConstraint(columnNames = "email")
+)
 @AllArgsConstructor
 @NoArgsConstructor
 @Data

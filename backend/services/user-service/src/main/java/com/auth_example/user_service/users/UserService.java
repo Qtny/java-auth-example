@@ -2,6 +2,7 @@ package com.auth_example.user_service.users;
 
 import com.auth_example.user_service.exceptions.UserMfaAlreadyEnabledException;
 import com.auth_example.user_service.exceptions.UserNotFoundException;
+import com.auth_example.user_service.exceptions.DuplicatedEmailException;
 import com.auth_example.user_service.users.models.CreateMfaRequest;
 import com.auth_example.user_service.users.models.CreateUserRequest;
 import com.auth_example.user_service.users.models.Mfa;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,12 @@ public class UserService {
     }
 
     public User create(@Valid CreateUserRequest request) {
+        // check if user with this email already existed
+        Optional<User> existingUser = userRepository.findOneByEmail(request.email());
+        if (existingUser.isPresent()) {
+            throw new DuplicatedEmailException("user with this email already existed");
+        }
+
         Mfa mfa = new Mfa(false, null, "", null);
         User newUser = mapper.createUserRequestToUser(request, mfa);
 
