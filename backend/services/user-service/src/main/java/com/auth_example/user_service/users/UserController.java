@@ -4,6 +4,7 @@ import com.auth_example.user_service.common.ApiResponse;
 import com.auth_example.user_service.users.models.CreateMfaRequest;
 import com.auth_example.user_service.users.models.CreateUserRequest;
 import com.auth_example.user_service.users.models.User;
+import com.auth_example.user_service.users.models.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +20,34 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<User>>> findAll() {
-        return ResponseEntity.ok(ApiResponse.success(userService.findAll()));
+    public ResponseEntity<ApiResponse<List<UserResponse>>> findAll() {
+        // fetch all users from db
+        List<User> users = userService.findAll();
+        // sanitize the users
+        List<UserResponse> userResponses = users
+                .stream()
+                .map(userService::sanitizeUser)
+                .toList();
+
+        return ResponseEntity.ok(ApiResponse.success(userResponses));
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<User>> findOneById(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok(ApiResponse.success(userService.findOneById(userId)));
+    public ResponseEntity<ApiResponse<UserResponse>> findOneById(@PathVariable("userId") Long userId) {
+        // fetch user from db
+        User user = userService.findOneById(userId);
+        // sanitize user
+        UserResponse sanitizedUser = userService.sanitizeUser(user);
+
+        return ResponseEntity.ok(ApiResponse.success(sanitizedUser));
+    }
+
+    @GetMapping("/{userId}/raw")
+    public ResponseEntity<ApiResponse<User>> findOneUnsanitizedById(@PathVariable("userId") Long userId) {
+        // fetch user from db
+        User user = userService.findOneById(userId);
+
+        return ResponseEntity.ok(ApiResponse.success(user));
     }
 
     @GetMapping("/email/{email}")
@@ -34,8 +56,13 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<User>> create(@RequestBody @Valid CreateUserRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(userService.create(request)));
+    public ResponseEntity<ApiResponse<UserResponse>> create(@RequestBody @Valid CreateUserRequest request) {
+        // create new user
+        User newUser = userService.create(request);
+        // sanitize output
+        UserResponse sanitizedUser = userService.sanitizeUser(newUser);
+
+        return ResponseEntity.ok(ApiResponse.success(sanitizedUser));
     }
 
     @PatchMapping("{userId}/mfa")

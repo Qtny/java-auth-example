@@ -1,5 +1,6 @@
 package com.auth_example.user_service.users.models;
 
+import com.auth_example.user_service.users.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,10 @@ public class User {
     @Builder.Default
     private String firstName = "Anonymous";
     private String lastName;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.PENDING_EMAIL_VERIFICATION;
 
     @Column(nullable = false)
     private String email;

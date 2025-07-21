@@ -3,10 +3,7 @@ package com.auth_example.user_service.users;
 import com.auth_example.user_service.exceptions.UserMfaAlreadyEnabledException;
 import com.auth_example.user_service.exceptions.UserNotFoundException;
 import com.auth_example.user_service.exceptions.DuplicatedEmailException;
-import com.auth_example.user_service.users.models.CreateMfaRequest;
-import com.auth_example.user_service.users.models.CreateUserRequest;
-import com.auth_example.user_service.users.models.Mfa;
-import com.auth_example.user_service.users.models.User;
+import com.auth_example.user_service.users.models.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,7 +36,6 @@ public class UserService {
 
         Mfa mfa = new Mfa(false, null, "", null);
         User newUser = mapper.createUserRequestToUser(request, mfa);
-
         return userRepository.save(newUser);
     }
 
@@ -63,5 +59,9 @@ public class UserService {
         userMfa.setMethod(request.method());
 
         return userRepository.save(user);
+    }
+
+    public UserResponse sanitizeUser(User user) {
+        return mapper.userToUserResponse(user);
     }
 }
