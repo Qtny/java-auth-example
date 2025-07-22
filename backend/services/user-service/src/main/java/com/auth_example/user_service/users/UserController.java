@@ -1,12 +1,13 @@
 package com.auth_example.user_service.users;
 
-import com.auth_example.user_service.common.ApiResponse;
+import com.auth_example.common_service.core.responses.ApiResponse;
 import com.auth_example.user_service.users.models.CreateMfaRequest;
 import com.auth_example.user_service.users.models.CreateUserRequest;
 import com.auth_example.user_service.users.models.User;
 import com.auth_example.user_service.users.models.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -51,8 +53,9 @@ public class UserController {
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<ApiResponse<User>> findOneByEmail(@PathVariable("email") String email) {
-        return ResponseEntity.ok(ApiResponse.success(userService.findOneByEmail(email)));
+    public ResponseEntity<ApiResponse<Boolean>> findOneByEmail(@PathVariable("email") String email) {
+        log.info("INFO :: checking if email exist");
+        return ResponseEntity.ok(ApiResponse.success(userService.emailExist(email)));
     }
 
     @PostMapping

@@ -39,11 +39,6 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
-    public User findOneByEmail(String email) {
-        return userRepository.findOneByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("user with email " + email + " does not exist"));
-    }
-
     public User enableMfa(Long userId, @Valid CreateMfaRequest request) {
         User user = userRepository.findOneById(userId)
                 .orElseThrow(() -> new UserNotFoundException("user with id " + userId + " does not exist"));
@@ -63,5 +58,10 @@ public class UserService {
 
     public UserResponse sanitizeUser(User user) {
         return mapper.userToUserResponse(user);
+    }
+
+    public boolean emailExist(String email) {
+        Optional<User> user = userRepository.findOneByEmail(email);
+        return user.isPresent();
     }
 }

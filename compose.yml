@@ -11,12 +11,40 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - backend
 
   adminer:
     image: adminer
     restart: always
     ports:
       - "5050:8080"
+    networks:
+      - backend
+
+  redis:
+    image: redis:7.2
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"  # RedisInsight UI port
+    networks:
+      - backend
+    depends_on:
+      - redis
 
 volumes:
   mysql_data:
+  redis_data:
+
+networks:
+  backend:
+    driver: bridge

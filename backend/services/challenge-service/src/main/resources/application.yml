@@ -1,3 +1,5 @@
+server:
+  port: 8082
 spring:
   application:
     name: challenge-service
@@ -11,3 +13,7 @@ spring:
       ddl-auto: update
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
+  data:
+    redis:
+      host: localhost
+      port: 6379

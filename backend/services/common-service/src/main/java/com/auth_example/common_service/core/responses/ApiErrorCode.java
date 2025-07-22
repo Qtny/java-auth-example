@@ -1,0 +1,10 @@
+package com.auth_example.common_service.core.responses;
+
+public enum ApiErrorCode {
+    VALIDATION_ERROR,
+    ENTITY_NOT_FOUND,
+    MFA_NOT_ENABLED,
+    EMAIL_VALIDATION_REQUIRED,
+    METHOD_NOT_ALLOWED,
+    ENTITY_ALREADY_EXIST
+}

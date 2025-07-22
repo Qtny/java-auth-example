@@ -4,5 +4,6 @@ public enum MfaMethod {
     SMS,
     EMAIL,
     TOTP,
-    CAPTCHA
+    CAPTCHA,
+    BIOMETRIC
 }

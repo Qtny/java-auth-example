@@ -1,5 +1,6 @@
 package com.auth_example.auth_service.auth.models;
 
+import com.auth_example.auth_service.mfa.MfaChallengeType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
