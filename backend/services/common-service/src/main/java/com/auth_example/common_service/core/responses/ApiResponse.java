@@ -16,7 +16,11 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, data, null);
     }
 
-    public static <T> ApiResponse<T> failure(ApiError errors) {
+    public static <T> ApiResponse<T> failure(T data) {
+        return new ApiResponse<>(false, data, null);
+    }
+
+    public static <T> ApiResponse<T> error(ApiError errors) {
         return new ApiResponse<>(false, null, errors);
     }
 }

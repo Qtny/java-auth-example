@@ -3,6 +3,7 @@ package com.auth_example.challenge_service.mfa;
 import com.auth_example.challenge_service.mfa.models.CreateChallengeRequest;
 import com.auth_example.challenge_service.mfa.models.MfaChallenge;
 import com.auth_example.challenge_service.otp.OtpService;
+import com.auth_example.challenge_service.user.models.UserEntry;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,5 +31,14 @@ public class MfaService {
         log.info("INFO :: creating challenge");
         MfaChallenge challenge = mapper.createChallengeRequestToMfaChallenge(request, userTempId, code);
         return mfaRepository.save(challenge);
+    }
+
+    public MfaChallenge findOneByUserId(UUID userId) {
+        return mfaRepository.findOneByUserId(userId);
+    }
+
+    public boolean compare(UUID challengeId, String code) {
+        log.info("comparing code with challenge");
+        return true;
     }
 }

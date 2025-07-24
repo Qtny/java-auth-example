@@ -6,3 +6,5 @@ spring:
 security:
   encryption:
     key: U1OxXggANfh5zyN1Guj+vFbpMAD1MfO+aGjwAuRE7m0
+  jwt:
+    secret: w+sxl98VWTC9QKJbi8VM42F4zRx9QgrnJz/tS12AETs=

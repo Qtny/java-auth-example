@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError(ENTITY_NOT_FOUND, exception.getMessage());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.failure(error));
+                .body(ApiResponse.error(error));
     }
 
     @ExceptionHandler(UserMfaAlreadyEnabledException.class)
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError(METHOD_NOT_ALLOWED, exception.getMessage());
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ApiResponse.failure(error));
+                .body(ApiResponse.error(error));
     }
 
     @ExceptionHandler(DuplicatedEmailException.class)
@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError(METHOD_NOT_ALLOWED, exception.getMessage());
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ApiResponse.failure(error));
+                .body(ApiResponse.error(error));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -56,6 +56,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.failure(error));
+                .body(ApiResponse.error(error));
     }
 }

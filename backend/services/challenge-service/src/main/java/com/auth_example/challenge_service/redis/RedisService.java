@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +21,17 @@ public class RedisService {
 
     public Optional<UserEntry> checkIfTempUserExist(String email) {
         log.info("INFO :: checking if temp user exist in redis");
-        return Optional.ofNullable(userRedisTemplate.opsForValue().get(REGISTRATION_KEY_PREFIX + email));
+        Optional<UserEntry> user = Optional.ofNullable(userRedisTemplate.opsForValue().get(REGISTRATION_KEY_PREFIX + email));
+        log.info(user.getClass().getName());
+        return user;
     }
 
     public void storeUserEntry(UserEntry entry, Duration ttl) {
         log.info("INFO :: storing temp user");
         userRedisTemplate.opsForValue().set(REGISTRATION_KEY_PREFIX + entry.getEmail(), entry, ttl);
+    }
+
+    public Optional<UserEntry> findUserEntryByUserId(String email) {
+        return Optional.ofNullable(userRedisTemplate.opsForValue().get(REGISTRATION_KEY_PREFIX + email));
     }
 }

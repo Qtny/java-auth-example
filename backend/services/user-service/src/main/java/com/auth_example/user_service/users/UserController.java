@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -34,25 +35,25 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(userResponses));
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserResponse>> findOneById(@PathVariable("userId") Long userId) {
+    @GetMapping("/email/{email}")
+    public ResponseEntity<ApiResponse<UserResponse>> findOneById(@PathVariable("email") String email) {
         // fetch user from db
-        User user = userService.findOneById(userId);
+        User user = userService.findOneByEmail(email);
         // sanitize user
         UserResponse sanitizedUser = userService.sanitizeUser(user);
 
         return ResponseEntity.ok(ApiResponse.success(sanitizedUser));
     }
 
-    @GetMapping("/{userId}/raw")
-    public ResponseEntity<ApiResponse<User>> findOneUnsanitizedById(@PathVariable("userId") Long userId) {
+    @GetMapping("/email/{email}/raw")
+    public ResponseEntity<ApiResponse<User>> findOneUnsanitizedById(@PathVariable("email") String email) {
         // fetch user from db
-        User user = userService.findOneById(userId);
+        User user = userService.findOneByEmail(email);
 
         return ResponseEntity.ok(ApiResponse.success(user));
     }
 
-    @GetMapping("/email/{email}")
+    @GetMapping("/email/{email}/exist")
     public ResponseEntity<ApiResponse<Boolean>> findOneByEmail(@PathVariable("email") String email) {
         log.info("INFO :: checking if email exist");
         return ResponseEntity.ok(ApiResponse.success(userService.emailExist(email)));
@@ -66,10 +67,5 @@ public class UserController {
         UserResponse sanitizedUser = userService.sanitizeUser(newUser);
 
         return ResponseEntity.ok(ApiResponse.success(sanitizedUser));
-    }
-
-    @PatchMapping("{userId}/mfa")
-    public ResponseEntity<ApiResponse<User>> enableMfa(@PathVariable("userId") Long userId, @RequestBody @Valid CreateMfaRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(userService.enableMfa(userId, request)));
     }
 }

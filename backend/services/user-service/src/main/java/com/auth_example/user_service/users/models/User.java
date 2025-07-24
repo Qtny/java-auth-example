@@ -1,5 +1,6 @@
 package com.auth_example.user_service.users.models;
 
+import com.auth_example.user_service.users.UserRole;
 import com.auth_example.user_service.users.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(
@@ -25,8 +27,8 @@ import java.time.LocalDate;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Builder.Default
     private String firstName = "Anonymous";
@@ -47,6 +49,10 @@ public class User {
 
     @Embedded
     private Address address;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private UserRole role = UserRole.USER;
 
     @CreatedDate
     private LocalDate createdAt;

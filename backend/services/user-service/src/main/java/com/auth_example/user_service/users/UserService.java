@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +23,9 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User findOneById(Long userId) {
-        return userRepository.findOneById(userId)
-                .orElseThrow(() -> new UserNotFoundException("user with id " + userId + " does not exist"));
+    public User findOneByEmail(String email) {
+        return userRepository.findOneByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("user with email " + email + " does not exist"));
     }
 
     public User create(@Valid CreateUserRequest request) {
@@ -39,22 +40,22 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
-    public User enableMfa(Long userId, @Valid CreateMfaRequest request) {
-        User user = userRepository.findOneById(userId)
-                .orElseThrow(() -> new UserNotFoundException("user with id " + userId + " does not exist"));
-
-        Mfa userMfa = user.getMfa();
-        boolean isMfaEnabled = userMfa.isEnabled();
-        if (isMfaEnabled) {
-            throw new UserMfaAlreadyEnabledException("this user has already enabled mfa");
-        }
-
-        userMfa.setEnabled(true);
-        userMfa.setTarget(request.target());
-        userMfa.setMethod(request.method());
-
-        return userRepository.save(user);
-    }
+//    public User enableMfa(UUID userId, @Valid CreateMfaRequest request) {
+//        User user = userRepository.findOneById(userId)
+//                .orElseThrow(() -> new UserNotFoundException("user with id " + userId + " does not exist"));
+//
+//        Mfa userMfa = user.getMfa();
+//        boolean isMfaEnabled = userMfa.isEnabled();
+//        if (isMfaEnabled) {
+//            throw new UserMfaAlreadyEnabledException("this user has already enabled mfa");
+//        }
+//
+//        userMfa.setEnabled(true);
+//        userMfa.setTarget(request.target());
+//        userMfa.setMethod(request.method());
+//
+//        return userRepository.save(user);
+//    }
 
     public UserResponse sanitizeUser(User user) {
         return mapper.userToUserResponse(user);

@@ -1,6 +1,7 @@
 package com.auth_example.challenge_service.user;
 
 import com.auth_example.challenge_service.exceptions.UserAlreadyExistException;
+import com.auth_example.challenge_service.exceptions.UserNotFoundException;
 import com.auth_example.challenge_service.mfa.models.CreateChallengeRequest;
 import com.auth_example.challenge_service.redis.RedisService;
 import com.auth_example.challenge_service.user.models.UserEntry;
@@ -22,18 +23,28 @@ public class UserService {
     private final RedisService redisService;
     private final UserDtoMapperImpl mapper;
 
-    public void checkIfTempUserExist(String email) {
-        Optional<UserEntry> entry = redisService.checkIfTempUserExist(email);
-        if (entry.isPresent()) {
-            throw new UserAlreadyExistException("user is already in the registration process");
-        };
+    public Optional<UserEntry> checkIfTempUserExist(String email) {
+        return redisService.checkIfTempUserExist(email);
+//        if (entry.isPresent()) {
+//            throw new UserAlreadyExistException("user is already in the registration process");
+//        };
     }
 
-    public void temporaryStoreUser(CreateChallengeRequest request, UUID userId) {
+    public UserEntry temporaryStoreUser(CreateChallengeRequest request, UUID userId) {
         // create user entry
         UserEntry userEntry = mapper.createChallengeRequestToUserEntry(request, userId);
 
         // store into redis
         redisService.storeUserEntry(userEntry, Duration.ofMinutes(5));
+        return userEntry;
+    }
+
+    public UserEntry retrieveUserEntry(String email) {
+        log.info("retrieving user from redis");
+        Optional<UserEntry> userEntry = redisService.findUserEntryByUserId(email);
+        if (userEntry.isPresent()) {
+            return userEntry.get();
+        }
+        throw new UserNotFoundException("user not found");
     }
 }
