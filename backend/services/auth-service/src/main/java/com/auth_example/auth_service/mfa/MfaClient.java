@@ -1,12 +1,13 @@
 package com.auth_example.auth_service.mfa;
 
 import com.auth_example.auth_service.auth.models.RegisterRequest;
-import com.auth_example.auth_service.mfa.models.CreateMfaPayload;
-import com.auth_example.auth_service.mfa.models.CreateMfaResponse;
-import com.auth_example.auth_service.mfa.models.VerifyMfaPayload;
+import com.auth_example.auth_service.exceptions.ApiNotSuccessException;
+import com.auth_example.auth_service.mfa.models.*;
 import com.auth_example.auth_service.users.models.NewUser;
 import com.auth_example.common_service.core.responses.ApiResponse;
 import com.auth_example.common_service.core.rest.BaseRestClient;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,8 @@ public class MfaClient {
 
     public CreateMfaResponse createMfa(RegisterRequest request) {
         CreateMfaPayload payload = mapper.registerRequestToCreateMfaPayload(request, MfaChallengeType.EMAIL);
-        ApiResponse<CreateMfaResponse> response = restClient.post(MFA_BASE_URL, payload, CreateMfaResponse.class);
+        String uri = MFA_BASE_URL + "/email";
+        ApiResponse<CreateMfaResponse> response = restClient.post(uri, payload, CreateMfaResponse.class);
         if (!response.isSuccess()) {
             log.info("INFO :: user with email [{}] have registered before, resuming registration process", request.email());
         }
@@ -32,15 +34,22 @@ public class MfaClient {
         return response.getData();
     }
 
-    public NewUser verify(UUID userId, UUID challengeId, String code) {
+    public EmailValidateResponse verify(String email, UUID challengeId, String code) {
         log.info("sending verification to [challenge service]");
-        VerifyMfaPayload payload = new VerifyMfaPayload(userId, challengeId, code);
-        String uri = MFA_BASE_URL + "/verify/registration";
-        ApiResponse<NewUser> response = restClient.post(uri, payload, NewUser.class);
+        VerifyMfaPayload payload = new VerifyMfaPayload(email, challengeId, code);
+        String uri = MFA_BASE_URL + "/verify/email";
+        ApiResponse<EmailValidateResponse> response = restClient.post(uri, payload, EmailValidateResponse.class);
         if (!response.isSuccess()) {
-
+            throw new ApiNotSuccessException("Api error");
         }
 
         return response.getData();
+    }
+
+    public UUID findOneByEmail(String email) {
+        log.info("finding existing challenge");
+        String uri = MFA_BASE_URL + "/email/" + email;
+        ApiResponse<MfaChallenge> response = restClient.get(uri, MfaChallenge.class);
+        return response.getData().getId();
     }
 }

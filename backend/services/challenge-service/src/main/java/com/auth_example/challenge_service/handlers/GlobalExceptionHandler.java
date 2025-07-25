@@ -1,11 +1,10 @@
 package com.auth_example.challenge_service.handlers;
 
-import com.auth_example.challenge_service.exceptions.UserAlreadyExistException;
-import com.auth_example.common_service.core.exceptions.RemoteServiceException;
+import com.auth_example.challenge_service.exceptions.ChallengeNotFoundException;
+import com.auth_example.challenge_service.exceptions.CodeDoesNotMatchException;
+import com.auth_example.challenge_service.exceptions.EmailMismatchException;
 import com.auth_example.common_service.core.responses.ApiError;
-import com.auth_example.common_service.core.responses.ApiErrorCode;
 import com.auth_example.common_service.core.responses.ApiResponse;
-import com.auth_example.common_service.exceptions.ServerErrorException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -13,25 +12,32 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import static com.auth_example.common_service.core.responses.ApiErrorCode.ENTITY_ALREADY_EXIST;
-import static com.auth_example.common_service.core.responses.ApiErrorCode.VALIDATION_ERROR;
+import static com.auth_example.common_service.core.responses.ApiErrorCode.*;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserAlreadyExistException.class)
-    public ResponseEntity<ApiResponse<Void>> handleUserAlreadyExistException(UserAlreadyExistException exception) {
-        ApiError error = new ApiError(ENTITY_ALREADY_EXIST, exception.getMessage());
+    @ExceptionHandler(ChallengeNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleChallengeNotFoundException(ChallengeNotFoundException exception) {
+        ApiError error = new ApiError(ENTITY_NOT_FOUND, exception.getMessage());
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(error));
     }
 
-    @ExceptionHandler(RemoteServiceException.class)
-    public ResponseEntity<ApiResponse<Void>> handleRemoteServiceException(RemoteServiceException exception) {
-        ApiError error = exception.getApiError();
+    @ExceptionHandler(CodeDoesNotMatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCodeDoesNotMatchException(CodeDoesNotMatchException exception) {
+        ApiError error = new ApiError(MFA_CODE_INCORRECT, exception.getMessage());
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(error));
+    }
+
+    @ExceptionHandler(EmailMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleEmailMismatchException(EmailMismatchException exception) {
+        ApiError error = new ApiError(UNAUTHORIZED, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error(error));
     }
 

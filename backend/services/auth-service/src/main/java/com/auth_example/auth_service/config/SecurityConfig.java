@@ -34,7 +34,8 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/api/v1/auth/register", "/api/v1/auth/request-otp").permitAll()
-                                .requestMatchers("/api/v1/auth/verify").hasRole("OTP")
+                                .requestMatchers("/api/auth/mfa/initiate", "/api/v1/auth/mfa/verify").hasRole("MFA")
+                                .requestMatchers("/api/v1/auth/register/verify").hasRole("OTP")
                                 .requestMatchers("/api/v1/auth").permitAll()
 //                        .requestMatchers("/api/v1/users/**").hasRole("USER")
                                 .anyRequest().authenticated()

@@ -3,7 +3,7 @@ package com.auth_example.auth_service.mfa.models;
 import java.util.UUID;
 
 public record VerifyMfaPayload(
-        UUID userId,
+        String email,
         UUID challengeId,
         String code
 ) {

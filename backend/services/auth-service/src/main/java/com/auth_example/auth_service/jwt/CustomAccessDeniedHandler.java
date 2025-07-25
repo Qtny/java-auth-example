@@ -11,14 +11,14 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import java.io.IOException;
 
-import static com.auth_example.common_service.core.responses.ApiErrorCode.ENTITY_ALREADY_EXIST;
+import static com.auth_example.common_service.core.responses.ApiErrorCode.FORBIDDEN;
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        ApiError error = new ApiError(ENTITY_ALREADY_EXIST, accessDeniedException.getMessage());
+        ApiError error = new ApiError(FORBIDDEN, accessDeniedException.getMessage());
 
         response.setContentType("application/json");
         response.setStatus(SC_FORBIDDEN);

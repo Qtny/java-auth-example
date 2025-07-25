@@ -1,5 +1,7 @@
 package com.auth_example.auth_service.jwt;
 
+import com.auth_example.common_service.jwt.TokenPurpose;
+import com.auth_example.common_service.jwt.TokenType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -17,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -24,6 +27,13 @@ import java.util.UUID;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private static final Map<TokenType, String> TOKEN_ROLE_MAP = Map.of(
+            TokenType.USER, "ROLE_USER"
+    );
+    private static final Map<TokenPurpose, String> TOKEN_PURPOSE_MAP = Map.of(
+            TokenPurpose.VERIFY_REGISTRATION, "ROLE_OTP",
+            TokenPurpose.VERIFY_MFA, "ROLE_MFA"
+    );
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -40,13 +50,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtService.parseToken(token);
 
             // get subject
-            String subject = claims.getSubject(); // userid
-            UUID userId = UUID.fromString(subject);
+            String userEmail = claims.getSubject();
 
             // get list of authorities based on claim
             List<GrantedAuthority> authorities = getAuthorityFromClaim(claims);
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId, null, authorities);
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userEmail, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (JwtException | IllegalArgumentException e) {
             // invalid token, clear context and return 401
@@ -60,19 +69,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private List<GrantedAuthority> getAuthorityFromClaim(Claims claims) {
+
         // get role from token type
-        String tokenType = claims.get("type", String.class);
-        if (tokenType == null) {
-            throw new JwtException("Invalid token type");
+        String role;
+        TokenType tokenType = TokenType.valueOf(claims.get("type", String.class));
+        if (tokenType.equals(TokenType.TRANSITIONAL)) {
+            TokenPurpose purpose = TokenPurpose.valueOf(claims.get("purpose", String.class));
+            role = TOKEN_PURPOSE_MAP.get(purpose);
+            if (role == null) {
+                throw new BadCredentialsException("Unknown purpose for transactional token");
+            }
+        } else {
+            role = TOKEN_ROLE_MAP.get(tokenType);
+            if (role == null) {
+                throw new BadCredentialsException("Unknown token type");
+            }
         }
 
-        String role = switch (tokenType) {
-            case "OTP" -> "ROLE_OTP";
-            case "USER" -> "ROLE_USER";
-            default -> throw new BadCredentialsException("Unknown token type");
-        };
-
-        // assign role based on token
         return List.of(new SimpleGrantedAuthority(role));
-    };
+    }
+
+    ;
 }

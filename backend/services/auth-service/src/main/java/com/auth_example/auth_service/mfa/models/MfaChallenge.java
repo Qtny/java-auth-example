@@ -1,6 +1,5 @@
-package com.auth_example.challenge_service.mfa.models;
+package com.auth_example.auth_service.mfa.models;
 
-import com.auth_example.challenge_service.mfa.MfaChallengeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,14 +13,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class MfaChallenge {
-
-    @Builder.Default
-    private UUID id = UUID.randomUUID();
-
+    private UUID id ;
     private String email;
     private MfaChallengeType type;
     private String code;
-
-    @Builder.Default
-    private LocalDate createdAt = LocalDate.now();
+    private LocalDate createdAt;
 }

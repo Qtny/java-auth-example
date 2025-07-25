@@ -1,5 +1,7 @@
 package com.auth_example.auth_service.jwt;
 
+import com.auth_example.common_service.jwt.TokenPurpose;
+import com.auth_example.common_service.jwt.TokenType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -25,6 +27,7 @@ public class JwtService {
     private String jwtSecret;
 
     private static final int OTP_JWT_TTL_IN_MINUTES = 5;
+    private static final int MFA_JWT_TTL_IN_MINUTES = 5;
     private static final int USER_JWT_TTL_IN_DAYS = 15;
 
     private SecretKey getSigningKey() {
@@ -39,10 +42,10 @@ public class JwtService {
     }
 
     // generate otp token
-    public String generateOtpToken(String subject) {
+    public String generateTransitionalToken(String subject, TokenPurpose purpose) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("type", "OTP");
-        claims.put("purpose", "VERIFY-EMAIL");
+        claims.put("type", TokenType.TRANSITIONAL);
+        claims.put("purpose", purpose);
         return Jwts.builder()
                 .claims()
                 .add(claims)
@@ -54,10 +57,10 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateUserToken(String subject) {
+    public String generateUserToken(String subject, TokenPurpose purpose) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("type", "USER");
-        claims.put("purpose", "AUTH");
+        claims.put("type", TokenType.USER);
+        claims.put("purpose", purpose);
         return Jwts.builder()
                 .claims()
                 .add(claims)

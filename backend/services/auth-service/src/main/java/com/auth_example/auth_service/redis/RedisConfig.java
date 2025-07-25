@@ -1,7 +1,6 @@
-package com.auth_example.challenge_service.redis;
+package com.auth_example.auth_service.redis;
 
-import com.auth_example.challenge_service.mfa.email.EmailMfaChallenge;
-import com.auth_example.challenge_service.mfa.models.MfaChallenge;
+import com.auth_example.auth_service.users.models.NewUser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -17,13 +16,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     @Bean
-    public RedisTemplate<String, MfaChallenge> mfaEntryTemplate(RedisConnectionFactory factory) {
-        return buildTemplate(factory, MfaChallenge.class);
-    }
-
-    @Bean
-    public RedisTemplate<String, EmailMfaChallenge> emailMfaTemplate(RedisConnectionFactory factory) {
-        return buildTemplate(factory, EmailMfaChallenge.class);
+    public RedisTemplate<String, NewUser> newUserTemplate(RedisConnectionFactory factory) {
+        return buildTemplate(factory, NewUser.class);
     }
 
     private <T> RedisTemplate<String, T> buildTemplate(RedisConnectionFactory factory, Class<T> classType) {

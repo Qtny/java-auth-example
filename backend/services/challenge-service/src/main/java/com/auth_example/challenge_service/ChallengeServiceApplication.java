@@ -4,11 +4,9 @@ import com.auth_example.common_service.config.CommonServiceConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @Import(CommonServiceConfig.class)
-@EnableJpaAuditing
 public class ChallengeServiceApplication {
 
 	public static void main(String[] args) {

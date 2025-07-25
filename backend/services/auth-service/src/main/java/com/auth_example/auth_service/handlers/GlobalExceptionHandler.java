@@ -2,6 +2,7 @@ package com.auth_example.auth_service.handlers;
 
 import com.auth_example.auth_service.exceptions.ApiNotSuccessException;
 import com.auth_example.auth_service.exceptions.EmailAlreadyExistException;
+import com.auth_example.auth_service.exceptions.RedisUserNotFoundException;
 import com.auth_example.common_service.core.exceptions.RemoteServiceException;
 import com.auth_example.common_service.core.responses.ApiError;
 import com.auth_example.common_service.core.responses.ApiResponse;
@@ -37,7 +38,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleApiNotSuccessException(ApiNotSuccessException exception) {
         ApiError error = new ApiError(ENTITY_NOT_FOUND, exception.getMessage());
         return ResponseEntity
-                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(error));
+    }
+
+    @ExceptionHandler(RedisUserNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRedisUserNotFoundException(RedisUserNotFoundException exception) {
+        ApiError error = new ApiError(ENTITY_NOT_FOUND, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(error));
     }
 
