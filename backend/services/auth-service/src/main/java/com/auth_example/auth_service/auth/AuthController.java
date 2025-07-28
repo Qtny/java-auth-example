@@ -2,9 +2,9 @@ package com.auth_example.auth_service.auth;
 
 import com.auth_example.auth_service.auth.models.*;
 import com.auth_example.auth_service.encryption.EncryptionService;
+import com.auth_example.auth_service.exceptions.MfaNotEnabledException;
 import com.auth_example.auth_service.jwt.JwtService;
 import com.auth_example.auth_service.mfa.MfaService;
-import com.auth_example.auth_service.mfa.models.EmailValidateResponse;
 import com.auth_example.auth_service.users.UserService;
 import com.auth_example.auth_service.users.models.User;
 import com.auth_example.common_service.core.responses.ApiResponse;
@@ -17,8 +17,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
-
-import static com.auth_example.common_service.core.responses.ApiErrorCode.MFA_NOT_ENABLED;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -63,17 +61,67 @@ public class AuthController {
         UUID challengeId = encryptionService.decryptUuid(request.challengeId());
 
         // check with challenge service for otp
-        EmailValidateResponse validationResponse = mfaService.verify(email, challengeId, request.code());
+        String responseEmail = mfaService.verifyEmail(email, challengeId, request.code());
 
         // create user with user service
-        User user = userService.createUser(validationResponse);
+        User user = userService.createUser(responseEmail);
 
         // prompt user to enable mfa
         // this occurrence is special because:
         // 1. it is an error, therefore the error code "MFA_NOT_ENABLED" is needed
         // 2. registration token has to be resigned for mfa
         String token = jwtService.generateTransitionalToken(user.getEmail(), TokenPurpose.VERIFY_MFA);
-        MfaNotEnabledResponse response = new MfaNotEnabledResponse(MFA_NOT_ENABLED, "mfa not enabled", token);
-        return ResponseEntity.ok(ApiResponse.failure(response));
+        throw new MfaNotEnabledException("mfa not enabled", token);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody @Valid LoginRequest request) {
+        // call user to check pw
+        User user = userService.validatePassword(request);
+        // check is mfa enabled
+        if (!user.getMfa().isEnabled()) {
+            String token = jwtService.generateTransitionalToken(user.getEmail(), TokenPurpose.VERIFY_MFA);
+            throw new MfaNotEnabledException("mfa has not been enabled", token);
+        }
+        // generate user token
+        String token = jwtService.generateUserToken(user.getEmail(), TokenPurpose.AUTHORIZATION);
+        LoginResponse response = new LoginResponse(token);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/mfa/email/initiate")
+    public ResponseEntity<ApiResponse<MfaInitiateResponse>> initiateEmailMfa(@RequestBody @Valid MfaEmailInitiateRequest request) {
+        // create challenge
+        UUID challengeId = mfaService.createEmailMfa(request.email());
+
+        // encrypt challenge id
+        String encryptedUuid = encryptionService.encryptUuid(challengeId);
+
+        MfaInitiateResponse response = new MfaInitiateResponse(encryptedUuid);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/mfa/sms/initiate")
+    public ResponseEntity<ApiResponse<MfaInitiateResponse>> initiateSmsMfa(@AuthenticationPrincipal String email, @RequestBody @Valid MfaSmsInitiateRequest request) {
+        MfaInitiateResponse response = new MfaInitiateResponse("aa");
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/mfa/email/verify")
+    public ResponseEntity<ApiResponse<LoginResponse>> verifyEmailMfa(@AuthenticationPrincipal String email, @RequestBody @Valid VerifyEmailMfaRequest request) {
+        // decrypt challenge id
+        UUID challengeId = encryptionService.decryptUuid(request.challengeId());
+
+        // check with mfa service on code
+        String responseEmail = mfaService.verifyEmail(email, challengeId, request.code());
+
+        // update user
+        userService.enableMfa(email);
+
+        // generate user token
+        String token = jwtService.generateUserToken(responseEmail, TokenPurpose.AUTHORIZATION);
+
+        LoginResponse response = new LoginResponse(token);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

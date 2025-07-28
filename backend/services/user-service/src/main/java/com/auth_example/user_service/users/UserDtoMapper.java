@@ -1,6 +1,6 @@
 package com.auth_example.user_service.users;
 
-import com.auth_example.user_service.users.models.CreateUserRequest;
+import com.auth_example.user_service.users.models.api.CreateUserRequest;
 import com.auth_example.user_service.users.models.User;
 import com.auth_example.user_service.users.models.Mfa;
 import com.auth_example.user_service.users.models.UserResponse;

@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -33,10 +35,9 @@ public class SecurityConfig {
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/v1/auth/register", "/api/v1/auth/request-otp").permitAll()
-                                .requestMatchers("/api/auth/mfa/initiate", "/api/v1/auth/mfa/verify").hasRole("MFA")
+                                .requestMatchers("/api/v1/auth/register", "/api/v1/auth/request-otp", "/api/v1/auth/login").permitAll()
+                                .requestMatchers("/api/v1/auth/mfa/email/initiate", "/api/v1/auth/mfa/email/verify").hasRole("MFA")
                                 .requestMatchers("/api/v1/auth/register/verify").hasRole("OTP")
-                                .requestMatchers("/api/v1/auth").permitAll()
 //                        .requestMatchers("/api/v1/users/**").hasRole("USER")
                                 .anyRequest().authenticated()
                 )
@@ -46,5 +47,10 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12); // strength = 2^12 iterations
     }
 }

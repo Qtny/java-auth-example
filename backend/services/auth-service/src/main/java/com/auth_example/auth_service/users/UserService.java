@@ -1,13 +1,16 @@
 package com.auth_example.auth_service.users;
 
+import com.auth_example.auth_service.auth.models.LoginRequest;
 import com.auth_example.auth_service.exceptions.EmailAlreadyExistException;
+import com.auth_example.auth_service.exceptions.InvalidEmailPasswordException;
 import com.auth_example.auth_service.exceptions.RedisUserNotFoundException;
-import com.auth_example.auth_service.mfa.models.EmailValidateResponse;
 import com.auth_example.auth_service.redis.RedisService;
 import com.auth_example.auth_service.users.models.NewUser;
 import com.auth_example.auth_service.users.models.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -19,6 +22,7 @@ public class UserService {
 
     private final UserClient userClient;
     private final RedisService redisService;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
     public void checkIfUserEmailExist(String email) {
         boolean isUserEmailExist = userClient.checkIfEmailExist(email);
@@ -31,14 +35,29 @@ public class UserService {
         return userClient.findOneByEmail(email);
     }
 
-    public User createUser(EmailValidateResponse response) {
+    public User createUser(String email) {
         // find temporary redis user
-        Optional<NewUser> redisAttempt = redisService.findNewUserByEmail(response.target());
+        Optional<NewUser> redisAttempt = redisService.findNewUserByEmail(email);
         if (redisAttempt.isEmpty()) {
-            throw new RedisUserNotFoundException("user with email " + response.target() + " not found in redis");
+            throw new RedisUserNotFoundException("user with email " + email + " not found in redis");
         }
 
         NewUser newUser = redisAttempt.get();
         return userClient.create(newUser);
+    }
+
+    public User validatePassword(LoginRequest request) {
+        // get user
+        User user = userClient.findOneByEmail(request.email());
+        // hash password
+        boolean isPasswordCorrect = passwordEncoder.matches(request.password(), user.getPassword());
+        if (!isPasswordCorrect) {
+            throw new InvalidEmailPasswordException("invalid email or password");
+        }
+        return user;
+    }
+
+    public void enableMfa(String email) {
+        userClient.enableMfa(email);
     }
 }

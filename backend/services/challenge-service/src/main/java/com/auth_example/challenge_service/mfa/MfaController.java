@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -29,8 +30,12 @@ public class MfaController {
 
     @PostMapping("/email")
     public ResponseEntity<ApiResponse<CreateMfaResponse>> create(@RequestBody @Valid EmailCreateRequest request) {
-        // create challenge
-        EmailMfaChallenge challenge = emailMfaService.create(request);
+        // check for existing email challenge
+        EmailMfaFindByEmailRequest findRequest = new EmailMfaFindByEmailRequest(request.email());
+        Optional<EmailMfaChallenge> existingChallenge = emailMfaService.findOne(findRequest);
+
+        // fetch if present, create if missing
+        EmailMfaChallenge challenge = existingChallenge.orElseGet(() -> emailMfaService.create(request));
 
         CreateMfaResponse response = new CreateMfaResponse(challenge.id());
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -42,10 +47,12 @@ public class MfaController {
         return ResponseEntity.ok(ApiResponse.success(challenge));
     }
 
-    @PostMapping("/verify/email")
+    @PostMapping("/email/verify")
     public ResponseEntity<ApiResponse<EmailValidateResponse>> verify(@RequestBody @Valid EmailValidateRequest request) {
         // check code for userid / email for request
         EmailMfaChallenge challenge = emailMfaService.validate(request);
+
+
         EmailValidateResponse response = new EmailValidateResponse(challenge.type(), challenge.email());
         return ResponseEntity.ok(ApiResponse.success(response));
     }

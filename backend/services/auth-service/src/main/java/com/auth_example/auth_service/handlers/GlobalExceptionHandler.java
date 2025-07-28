@@ -1,8 +1,7 @@
 package com.auth_example.auth_service.handlers;
 
-import com.auth_example.auth_service.exceptions.ApiNotSuccessException;
-import com.auth_example.auth_service.exceptions.EmailAlreadyExistException;
-import com.auth_example.auth_service.exceptions.RedisUserNotFoundException;
+import com.auth_example.auth_service.auth.models.MfaNotEnabledResponse;
+import com.auth_example.auth_service.exceptions.*;
 import com.auth_example.common_service.core.exceptions.RemoteServiceException;
 import com.auth_example.common_service.core.responses.ApiError;
 import com.auth_example.common_service.core.responses.ApiResponse;
@@ -48,6 +47,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(error));
+    }
+
+    @ExceptionHandler(InvalidEmailPasswordException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidEmailPasswordException(InvalidEmailPasswordException exception) {
+        ApiError error = new ApiError(INVALID_CREDENTIAL, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(error));
+    }
+
+    @ExceptionHandler(MfaNotEnabledException.class)
+    public ResponseEntity<ApiResponse<MfaNotEnabledResponse>> MfaNotEnabledException(MfaNotEnabledException exception) {
+        MfaNotEnabledResponse response = new MfaNotEnabledResponse(MFA_NOT_ENABLED, exception.getMessage(), exception.getToken());
+        return ResponseEntity.ok(ApiResponse.failure(response));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

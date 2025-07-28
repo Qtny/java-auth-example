@@ -2,6 +2,10 @@ package com.auth_example.auth_service.users;
 
 import com.auth_example.auth_service.exceptions.ApiNotSuccessException;
 import com.auth_example.auth_service.users.models.*;
+import com.auth_example.auth_service.users.models.api.CheckUserEmailExistPayload;
+import com.auth_example.auth_service.users.models.api.CreateUserPayload;
+import com.auth_example.auth_service.users.models.api.FindUserByEmailPayload;
+import com.auth_example.auth_service.users.models.api.EnableMfaPayload;
 import com.auth_example.common_service.core.responses.ApiResponse;
 import com.auth_example.common_service.core.rest.BaseRestClient;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +22,6 @@ public class UserClient {
     private final BaseRestClient restClient;
     private final UserDtoMapperImpl mapper;
 
-//    public ApiResponse<Boolean> createNewUser(RegisterRequest request) {
-//        return restClient.post(USER_BASE_URL, request, Boolean.class);
-//    }
-
     public boolean checkIfEmailExist(String email) {
         CheckUserEmailExistPayload payload = new CheckUserEmailExistPayload(email);
         String uri = USER_BASE_URL + "/email/" + email + "/exist";
@@ -35,7 +35,7 @@ public class UserClient {
 
     public User findOneByEmail(String email) {
         FindUserByEmailPayload payload = new FindUserByEmailPayload(email);
-        String uri = USER_BASE_URL + "/email/" + email;
+        String uri = USER_BASE_URL + "/email/" + email + "/raw";
         ApiResponse<User> response = restClient.get(uri, User.class);
         if (!response.isSuccess()) {
             throw new ApiNotSuccessException("Api error");
@@ -49,5 +49,14 @@ public class UserClient {
         CreateUserPayload payload = mapper.userToCreateUserPayload(user);
         ApiResponse<User> response = restClient.post(USER_BASE_URL, payload, User.class);
         return response.getData();
+    }
+
+    public void enableMfa(String email) {
+        String uri = USER_BASE_URL + "/mfa/enable";
+        EnableMfaPayload payload = new EnableMfaPayload(email);
+        ApiResponse<Void> response = restClient.patch(uri, payload, Void.class);
+        if (!response.isSuccess()) {
+            throw new ApiNotSuccessException("Api error");
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.auth_example.user_service.users;
 import com.auth_example.user_service.exceptions.UserMfaAlreadyEnabledException;
 import com.auth_example.user_service.exceptions.UserNotFoundException;
 import com.auth_example.user_service.exceptions.DuplicatedEmailException;
+import com.auth_example.user_service.users.models.api.CreateUserRequest;
 import com.auth_example.user_service.users.models.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -64,5 +64,19 @@ public class UserService {
     public boolean emailExist(String email) {
         Optional<User> user = userRepository.findOneByEmail(email);
         return user.isPresent();
+    }
+
+    public void enableMfa(String email) {
+        User user = userRepository.findOneByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("user with email " + email + " does not exist"));
+
+        Mfa userMfa = user.getMfa();
+        boolean isMfaEnabled = userMfa.isEnabled();
+        if (isMfaEnabled) {
+            throw new UserMfaAlreadyEnabledException("this user has already enabled mfa");
+        }
+
+        userMfa.setEnabled(true);
+        userRepository.save(user);
     }
 }

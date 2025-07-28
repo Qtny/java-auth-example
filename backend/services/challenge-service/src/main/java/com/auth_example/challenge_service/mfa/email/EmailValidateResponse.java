@@ -5,5 +5,5 @@ import com.auth_example.challenge_service.mfa.MfaChallengeType;
 
 public record EmailValidateResponse(
         MfaChallengeType type,
-        String target
+        String email
 ) implements BaseMfaValidateResponse {}

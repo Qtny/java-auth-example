@@ -1,4 +1,4 @@
-package com.auth_example.user_service.users.models;
+package com.auth_example.user_service.users.models.api;
 
 import com.auth_example.user_service.users.MfaMethod;
 import jakarta.validation.constraints.NotNull;

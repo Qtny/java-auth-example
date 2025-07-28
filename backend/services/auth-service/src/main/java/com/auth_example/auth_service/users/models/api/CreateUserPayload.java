@@ -1,6 +1,6 @@
-package com.auth_example.auth_service.users.models;
+package com.auth_example.auth_service.users.models.api;
 
-import java.util.UUID;
+import com.auth_example.auth_service.users.models.Address;
 
 public record CreateUserPayload(
     String firstName,

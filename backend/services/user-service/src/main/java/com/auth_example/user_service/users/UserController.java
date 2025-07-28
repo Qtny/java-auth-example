@@ -1,10 +1,10 @@
 package com.auth_example.user_service.users;
 
 import com.auth_example.common_service.core.responses.ApiResponse;
-import com.auth_example.user_service.users.models.CreateMfaRequest;
-import com.auth_example.user_service.users.models.CreateUserRequest;
+import com.auth_example.user_service.users.models.api.CreateUserRequest;
 import com.auth_example.user_service.users.models.User;
 import com.auth_example.user_service.users.models.UserResponse;
+import com.auth_example.user_service.users.models.api.UpdateMfaRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -67,5 +66,13 @@ public class UserController {
         UserResponse sanitizedUser = userService.sanitizeUser(newUser);
 
         return ResponseEntity.ok(ApiResponse.success(sanitizedUser));
+    }
+
+    @PatchMapping("/mfa/enable")
+    public ResponseEntity<ApiResponse<Void>> updateMfa(@RequestBody @Valid UpdateMfaRequest request) {
+        // update user mfa
+        userService.enableMfa(request.email());
+
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

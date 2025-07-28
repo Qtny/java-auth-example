@@ -2,7 +2,6 @@ package com.auth_example.common_service.core.rest;
 
 import com.auth_example.common_service.core.exceptions.RemoteServiceException;
 import com.auth_example.common_service.core.responses.ApiResponse;
-import com.auth_example.common_service.exceptions.ClientErrorException;
 import com.auth_example.common_service.exceptions.ExternalApiException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.ParameterizedTypeReference;
@@ -88,6 +87,23 @@ public class BaseRestClient {
                     .body(typeRef);
         } catch (RestClientException e) {
             throw new ExternalApiException("Error during POST to " + uri, e);
+        }
+    }
+
+    public <T> ApiResponse<T> patch(String uri, Object body, Class<T> responseType) {
+        ParameterizedTypeReference<ApiResponse<T>> typeRef = ParameterizedTypeReference.forType(
+                ResolvableType.forClassWithGenerics(ApiResponse.class, responseType). getType()
+        );
+
+        try {
+            return restClient.patch()
+                    .uri(uri)
+                    .contentType(APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .body(typeRef);
+        } catch (RestClientException e) {
+            throw new ExternalApiException("Error during PATCH to " + uri, e);
         }
     }
 }

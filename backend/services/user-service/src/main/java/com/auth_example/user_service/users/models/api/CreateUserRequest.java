@@ -1,5 +1,6 @@
-package com.auth_example.user_service.users.models;
+package com.auth_example.user_service.users.models.api;
 
+import com.auth_example.user_service.users.models.Address;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
