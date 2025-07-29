@@ -2,17 +2,20 @@ package com.auth_example.auth_service.jwt;
 
 import com.auth_example.common_service.jwt.TokenPurpose;
 import com.auth_example.common_service.jwt.TokenType;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.io.Encoders;
-import io.jsonwebtoken.security.Keys;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import lombok.RequiredArgsConstructor;
+import org.apache.el.parser.Token;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.security.KeyPair;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -21,64 +24,67 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
     @Value("${security.jwt.secret}")
     private String jwtSecret;
+    private final KeyPair keyPair;
 
     private static final int OTP_JWT_TTL_IN_MINUTES = 5;
     private static final int MFA_JWT_TTL_IN_MINUTES = 5;
     private static final int USER_JWT_TTL_IN_DAYS = 15;
 
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    public String genKey() {
-        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-        String base64Key = Encoders.BASE64.encode(key.getEncoded());
-        return base64Key;
-    }
-
     // generate otp token
-    public String generateTransitionalToken(String subject, TokenPurpose purpose) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("type", TokenType.TRANSITIONAL);
-        claims.put("purpose", purpose);
-        return Jwts.builder()
-                .claims()
-                .add(claims)
+    public String generateTransitionalToken(String subject, TokenPurpose purpose) throws JOSEException {
+        Instant now = Instant.now();
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .subject(subject)
-                .issuedAt(Date.from(Instant.now()))
-                .expiration(Date.from(Instant.now().plus(OTP_JWT_TTL_IN_MINUTES, ChronoUnit.MINUTES)))
-                .and()
-                .signWith(getSigningKey())
-                .compact();
+                .issueTime(Date.from(now))
+                .expirationTime(Date.from(now.plus(OTP_JWT_TTL_IN_MINUTES, ChronoUnit.MINUTES)))
+                .claim("type", TokenType.TRANSITIONAL)
+                .claim("purpose", purpose)
+                .issuer("auth-service")
+                .build();
+
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
+                .keyID("auth-key")
+                .type(JOSEObjectType.JWT)
+                .build();
+
+        SignedJWT signedJWT = new SignedJWT(header, claims);
+        signedJWT.sign(new RSASSASigner(keyPair.getPrivate()));
+        return signedJWT.serialize();
     }
 
-    public String generateUserToken(String subject, TokenPurpose purpose) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("type", TokenType.USER);
-        claims.put("purpose", purpose);
-        return Jwts.builder()
-                .claims()
-                .add(claims)
+    public String generateUserToken(String subject, TokenPurpose purpose) throws JOSEException {
+        Instant now = Instant.now();
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .subject(subject)
-                .issuedAt(Date.from(Instant.now()))
-                .expiration(Date.from(Instant.now().plus(USER_JWT_TTL_IN_DAYS, ChronoUnit.DAYS)))
-                .and()
-                .signWith(getSigningKey())
-                .compact();
+                .issueTime(Date.from(now))
+                .expirationTime(Date.from(now.plus(USER_JWT_TTL_IN_DAYS, ChronoUnit.DAYS)))
+                .claim("type", TokenType.USER)
+                .claim("purpose", purpose)
+                .issuer("auth-service")
+                .build();
+
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
+                .keyID("auth-key")
+                .type(JOSEObjectType.JWT)
+                .build();
+
+        SignedJWT signedJWT = new SignedJWT(header, claims);
+        signedJWT.sign(new RSASSASigner(keyPair.getPrivate()));
+        return signedJWT.serialize();
     }
 
-    public Claims parseToken(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
+//    public Claims parseToken(String token) {
+//        return Jwts.parser()
+//                .verifyWith(getSigningKey())
+//                .build()
+//                .parseSignedClaims(token)
+//                .getPayload();
+//    }
 
 //    public String extractSubject(String token) { return extractClaim(token, Claims::getSubject); };
 //

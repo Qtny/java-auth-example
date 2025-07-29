@@ -30,7 +30,7 @@ public class MfaService {
         Optional<NewUser> redisUser = redisService.findNewUserByEmail(request.email());
         if (redisUser.isPresent()) {
             // fetch challenge id
-            return mfaClient.findOneByEmail(request.email());
+            return mfaClient.findOneRegisterMfaByEmail(request.email());
         } else {
             // store user in redis temporarily
             NewUser newUser = userMapper.registerRequestToNewUser(request);
@@ -48,6 +48,11 @@ public class MfaService {
         // create challenge
         CreateMfaResponse response = mfaClient.createEmailMfa(email);
         return response.challengeId();
+    }
+
+    public String verifyRegisterEmail(String email, UUID challengeId, String code) {
+        EmailValidateResponse response = mfaClient.verifyRegisterMfa(email, challengeId, code);
+        return response.email();
     }
 
     public String verifyEmail(String email, UUID challengeId, String code) {

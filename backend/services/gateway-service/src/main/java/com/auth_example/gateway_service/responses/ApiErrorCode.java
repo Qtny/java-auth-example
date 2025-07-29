@@ -1,0 +1,14 @@
+package com.auth_example.gateway_service.responses;
+
+public enum ApiErrorCode {
+    VALIDATION_ERROR,
+    ENTITY_NOT_FOUND,
+    MFA_NOT_ENABLED,
+    MFA_CODE_INCORRECT,
+    EMAIL_VALIDATION_REQUIRED,
+    METHOD_NOT_ALLOWED,
+    ENTITY_ALREADY_EXIST,
+    UNAUTHORIZED,
+    FORBIDDEN,
+    INVALID_CREDENTIAL
+}

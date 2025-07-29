@@ -1,9 +1,11 @@
-package com.auth_example.challenge_service.mfa.email;
+package com.auth_example.challenge_service.mfa.email.register;
 
 import com.auth_example.challenge_service.exceptions.ChallengeNotFoundException;
 import com.auth_example.challenge_service.exceptions.CodeDoesNotMatchException;
 import com.auth_example.challenge_service.exceptions.EmailMismatchException;
-import com.auth_example.challenge_service.mfa.*;
+import com.auth_example.challenge_service.mfa.BaseMfaService;
+import com.auth_example.challenge_service.mfa.MfaChallengeType;
+import com.auth_example.challenge_service.mfa.MfaDtoMapperImpl;
 import com.auth_example.challenge_service.mfa.email.models.EmailCreateRequest;
 import com.auth_example.challenge_service.mfa.email.models.EmailMfaChallenge;
 import com.auth_example.challenge_service.mfa.email.models.EmailMfaFindByEmailRequest;
@@ -17,19 +19,18 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
-@RequiredArgsConstructor
 @Service
 @Slf4j
-public class EmailMfaService implements BaseMfaService<
+@RequiredArgsConstructor
+public class RegisterEmailMfaService implements BaseMfaService<
         EmailCreateRequest,
         EmailValidateRequest,
         EmailMfaFindByEmailRequest
-        >
-{
+        > {
 
     private final OtpService otpService;
     private final MfaDtoMapperImpl mapper;
-    private final EmailMfaRedisService redisService;
+    private final RegisterEmailMfaRedisService redisService;
 
     @Override
     public MfaChallengeType getType() {

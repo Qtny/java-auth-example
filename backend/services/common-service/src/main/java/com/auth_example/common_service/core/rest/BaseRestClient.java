@@ -24,8 +24,6 @@ public class BaseRestClient {
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
-
-
     public BaseRestClient(RestClient.Builder restClientBuilder, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.restClient = restClientBuilder
@@ -58,7 +56,7 @@ public class BaseRestClient {
                 .build();
     }
 
-    public <T> ApiResponse<T> get(String uri, Class<T> responseType) {
+    public <T> ApiResponse<T> get(String uri, RequestOption options, Class<T> responseType) {
         ParameterizedTypeReference<ApiResponse<T>> typeRef = ParameterizedTypeReference.forType(
                 ResolvableType.forClassWithGenerics(ApiResponse.class, responseType). getType()
         );
@@ -66,6 +64,7 @@ public class BaseRestClient {
         try {
             return restClient.get()
                     .uri(uri)
+                    .headers(options.headers())
                     .retrieve()
                     .body(typeRef);
         } catch (RestClientException e) {
@@ -73,7 +72,7 @@ public class BaseRestClient {
         }
     }
 
-    public <T> ApiResponse<T> post(String uri, Object body, Class<T> responseType) {
+    public <T> ApiResponse<T> post(String uri, Object body, RequestOption options, Class<T> responseType) {
         ParameterizedTypeReference<ApiResponse<T>> typeRef = ParameterizedTypeReference.forType(
                 ResolvableType.forClassWithGenerics(ApiResponse.class, responseType). getType()
         );
@@ -81,6 +80,7 @@ public class BaseRestClient {
         try {
             return restClient.post()
                     .uri(uri)
+                    .headers(options.headers())
                     .contentType(APPLICATION_JSON)
                     .body(body)
                     .retrieve()
@@ -90,7 +90,7 @@ public class BaseRestClient {
         }
     }
 
-    public <T> ApiResponse<T> patch(String uri, Object body, Class<T> responseType) {
+    public <T> ApiResponse<T> patch(String uri, Object body, RequestOption options, Class<T> responseType) {
         ParameterizedTypeReference<ApiResponse<T>> typeRef = ParameterizedTypeReference.forType(
                 ResolvableType.forClassWithGenerics(ApiResponse.class, responseType). getType()
         );
@@ -99,6 +99,7 @@ public class BaseRestClient {
             return restClient.patch()
                     .uri(uri)
                     .contentType(APPLICATION_JSON)
+                    .headers(options.headers())
                     .body(body)
                     .retrieve()
                     .body(typeRef);

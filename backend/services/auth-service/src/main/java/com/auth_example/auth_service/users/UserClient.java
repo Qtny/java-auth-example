@@ -8,6 +8,7 @@ import com.auth_example.auth_service.users.models.api.FindUserByEmailPayload;
 import com.auth_example.auth_service.users.models.api.EnableMfaPayload;
 import com.auth_example.common_service.core.responses.ApiResponse;
 import com.auth_example.common_service.core.rest.BaseRestClient;
+import com.auth_example.common_service.core.rest.RequestOption;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class UserClient {
     public boolean checkIfEmailExist(String email) {
         CheckUserEmailExistPayload payload = new CheckUserEmailExistPayload(email);
         String uri = USER_BASE_URL + "/email/" + email + "/exist";
-        ApiResponse<Boolean> response = restClient.get(uri, Boolean.class);
+        ApiResponse<Boolean> response = restClient.get(uri, RequestOption.internalNone(), Boolean.class);
         if (!response.isSuccess()) {
             throw new ApiNotSuccessException("Api error");
         }
@@ -36,7 +37,7 @@ public class UserClient {
     public User findOneByEmail(String email) {
         FindUserByEmailPayload payload = new FindUserByEmailPayload(email);
         String uri = USER_BASE_URL + "/email/" + email + "/raw";
-        ApiResponse<User> response = restClient.get(uri, User.class);
+        ApiResponse<User> response = restClient.get(uri, RequestOption.internalNone(), User.class);
         if (!response.isSuccess()) {
             throw new ApiNotSuccessException("Api error");
         }
@@ -47,14 +48,14 @@ public class UserClient {
     public User create(NewUser user) {
         log.info("creating user");
         CreateUserPayload payload = mapper.userToCreateUserPayload(user);
-        ApiResponse<User> response = restClient.post(USER_BASE_URL, payload, User.class);
+        ApiResponse<User> response = restClient.post(USER_BASE_URL, payload, RequestOption.internalNone(), User.class);
         return response.getData();
     }
 
     public void enableMfa(String email) {
         String uri = USER_BASE_URL + "/mfa/enable";
         EnableMfaPayload payload = new EnableMfaPayload(email);
-        ApiResponse<Void> response = restClient.patch(uri, payload, Void.class);
+        ApiResponse<Void> response = restClient.patch(uri, payload, RequestOption.internalNone(), Void.class);
         if (!response.isSuccess()) {
             throw new ApiNotSuccessException("Api error");
         }

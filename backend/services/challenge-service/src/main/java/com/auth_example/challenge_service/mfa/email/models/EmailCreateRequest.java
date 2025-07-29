@@ -1,4 +1,4 @@
-package com.auth_example.challenge_service.mfa.email;
+package com.auth_example.challenge_service.mfa.email.models;
 
 import com.auth_example.challenge_service.mfa.MfaChallengeType;
 import com.auth_example.challenge_service.mfa.BaseMfaCreateRequest;

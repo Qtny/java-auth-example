@@ -23,6 +23,7 @@
         <module>auth-service</module>
         <module>user-service</module>
         <module>challenge-service</module>
+        <module>gateway-service</module>
         <!-- Add more as needed -->
     </modules>
 
