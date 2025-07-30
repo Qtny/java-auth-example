@@ -41,6 +41,18 @@ services:
     depends_on:
       - redis
 
+  maildev:
+    image: maildev/maildev:latest
+    ports:
+      - "1080:1080"   # Web UI
+      - "1025:1025"   # SMTP
+    restart: unless-stopped
+    environment:
+      - MAILDEV_INCOMING_USER=
+      - MAILDEV_INCOMING_PASS=
+    networks:
+      - backend
+
 volumes:
   mysql_data:
   redis_data:
