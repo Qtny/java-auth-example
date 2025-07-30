@@ -8,5 +8,9 @@ spring:
       host: localhost
       port: 6379
   mail:
-    host: maildev
+    host: localhost
     port: 1025
+  thymeleaf:
+    check-template-location: false
+    cache: false
+    enabled: true

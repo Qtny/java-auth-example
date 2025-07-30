@@ -4,6 +4,7 @@ import com.auth_example.challenge_service.mfa.email.models.*;
 import com.auth_example.challenge_service.mfa.models.CreateMfaResponse;
 import com.auth_example.challenge_service.mfa.email.register.RegisterEmailMfaService;
 import com.auth_example.common_service.core.responses.ApiResponse;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.Optional;
 public class EmailMfaController {
 
     private final EmailMfaService emailMfaService;
+    private final EmailService emailService;
     private final RegisterEmailMfaService registerEmailMfaService;
 
     @PostMapping
@@ -28,7 +30,12 @@ public class EmailMfaController {
         // fetch if present, create if missing
         EmailMfaChallenge challenge = existingChallenge.orElseGet(() -> emailMfaService.create(request));
 
+        // create mfa challenge
         CreateMfaResponse response = new CreateMfaResponse(challenge.id());
+
+        // send email
+        emailService.sendOtpEmail(challenge.email(), challenge.code());
+
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -42,7 +49,6 @@ public class EmailMfaController {
     public ResponseEntity<ApiResponse<EmailValidateResponse>> verify(@RequestBody @Valid EmailValidateRequest request) {
         // check code for userid / email for request
         EmailMfaChallenge challenge = emailMfaService.validate(request);
-
 
         EmailValidateResponse response = new EmailValidateResponse(challenge.type(), challenge.email());
         return ResponseEntity.ok(ApiResponse.success(response));

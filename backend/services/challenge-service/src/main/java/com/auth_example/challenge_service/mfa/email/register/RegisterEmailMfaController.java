@@ -1,8 +1,10 @@
 package com.auth_example.challenge_service.mfa.email.register;
 
+import com.auth_example.challenge_service.mfa.email.EmailService;
 import com.auth_example.challenge_service.mfa.email.models.*;
 import com.auth_example.challenge_service.mfa.models.CreateMfaResponse;
 import com.auth_example.common_service.core.responses.ApiResponse;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import java.util.Optional;
 public class RegisterEmailMfaController {
 
     private final RegisterEmailMfaService registerEmailMfaService;
+    private final EmailService emailService;
 
     @PostMapping("/email")
     public ResponseEntity<ApiResponse<CreateMfaResponse>> create(@RequestBody @Valid EmailCreateRequest request) {
@@ -28,7 +31,12 @@ public class RegisterEmailMfaController {
         // fetch if present, create if missing
         EmailMfaChallenge challenge = existingChallenge.orElseGet(() -> registerEmailMfaService.create(request));
 
+        // create mfa challenge
         CreateMfaResponse response = new CreateMfaResponse(challenge.id());
+
+        // send email
+        emailService.sendOtpEmail(challenge.email(), challenge.code());
+
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
