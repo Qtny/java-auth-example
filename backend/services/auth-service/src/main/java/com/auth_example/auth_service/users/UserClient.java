@@ -1,6 +1,7 @@
 package com.auth_example.auth_service.users;
 
 import com.auth_example.auth_service.exceptions.ApiNotSuccessException;
+import com.auth_example.auth_service.mfa.MfaChallengeType;
 import com.auth_example.auth_service.users.models.*;
 import com.auth_example.auth_service.users.models.api.CheckUserEmailExistPayload;
 import com.auth_example.auth_service.users.models.api.CreateUserPayload;
@@ -52,9 +53,9 @@ public class UserClient {
         return response.getData();
     }
 
-    public void enableMfa(String email) {
+    public void enableMfa(String email, MfaChallengeType type, String target) {
         String uri = USER_BASE_URL + "/mfa/enable";
-        EnableMfaPayload payload = new EnableMfaPayload(email);
+        EnableMfaPayload payload = new EnableMfaPayload(email, type, target);
         ApiResponse<Void> response = restClient.patch(uri, payload, RequestOption.internalNone(), Void.class);
         if (!response.isSuccess()) {
             throw new ApiNotSuccessException("Api error");

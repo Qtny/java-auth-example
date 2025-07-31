@@ -1,5 +1,6 @@
 package com.auth_example.auth_service.mfa.models;
 
+import com.auth_example.auth_service.mfa.MfaChallengeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

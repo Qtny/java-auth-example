@@ -1,5 +1,6 @@
 package com.auth_example.auth_service.jwt;
 
+import com.auth_example.auth_service.exceptions.TokenCreationException;
 import com.auth_example.common_service.jwt.TokenPurpose;
 import com.auth_example.common_service.jwt.TokenType;
 import com.nimbusds.jose.JOSEException;
@@ -36,46 +37,54 @@ public class JwtService {
     private static final int USER_JWT_TTL_IN_DAYS = 15;
 
     // generate otp token
-    public String generateTransitionalToken(String subject, TokenPurpose purpose) throws JOSEException {
-        Instant now = Instant.now();
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .subject(subject)
-                .issueTime(Date.from(now))
-                .expirationTime(Date.from(now.plus(OTP_JWT_TTL_IN_MINUTES, ChronoUnit.MINUTES)))
-                .claim("type", TokenType.TRANSITIONAL)
-                .claim("purpose", purpose)
-                .issuer("auth-service")
-                .build();
+    public String generateTransitionalToken(String subject, TokenPurpose purpose) {
+        try {
+            Instant now = Instant.now();
+            JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                    .subject(subject)
+                    .issueTime(Date.from(now))
+                    .expirationTime(Date.from(now.plus(OTP_JWT_TTL_IN_MINUTES, ChronoUnit.MINUTES)))
+                    .claim("type", TokenType.TRANSITIONAL)
+                    .claim("purpose", purpose)
+                    .issuer("auth-service")
+                    .build();
 
-        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
-                .keyID("auth-key")
-                .type(JOSEObjectType.JWT)
-                .build();
+            JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
+                    .keyID("auth-key")
+                    .type(JOSEObjectType.JWT)
+                    .build();
 
-        SignedJWT signedJWT = new SignedJWT(header, claims);
-        signedJWT.sign(new RSASSASigner(keyPair.getPrivate()));
-        return signedJWT.serialize();
+            SignedJWT signedJWT = new SignedJWT(header, claims);
+            signedJWT.sign(new RSASSASigner(keyPair.getPrivate()));
+            return signedJWT.serialize();
+        } catch (JOSEException exp) {
+            throw new TokenCreationException("user token failed to be created");
+        }
     }
 
-    public String generateUserToken(String subject, TokenPurpose purpose) throws JOSEException {
-        Instant now = Instant.now();
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .subject(subject)
-                .issueTime(Date.from(now))
-                .expirationTime(Date.from(now.plus(USER_JWT_TTL_IN_DAYS, ChronoUnit.DAYS)))
-                .claim("type", TokenType.USER)
-                .claim("purpose", purpose)
-                .issuer("auth-service")
-                .build();
+    public String generateUserToken(String subject, TokenPurpose purpose) {
+         try {
+             Instant now = Instant.now();
+             JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                     .subject(subject)
+                     .issueTime(Date.from(now))
+                     .expirationTime(Date.from(now.plus(USER_JWT_TTL_IN_DAYS, ChronoUnit.DAYS)))
+                     .claim("type", TokenType.USER)
+                     .claim("purpose", purpose)
+                     .issuer("auth-service")
+                     .build();
 
-        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
-                .keyID("auth-key")
-                .type(JOSEObjectType.JWT)
-                .build();
+             JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
+                     .keyID("auth-key")
+                     .type(JOSEObjectType.JWT)
+                     .build();
 
-        SignedJWT signedJWT = new SignedJWT(header, claims);
-        signedJWT.sign(new RSASSASigner(keyPair.getPrivate()));
-        return signedJWT.serialize();
+             SignedJWT signedJWT = new SignedJWT(header, claims);
+             signedJWT.sign(new RSASSASigner(keyPair.getPrivate()));
+             return signedJWT.serialize();
+         } catch (JOSEException exp) {
+             throw new TokenCreationException("user token failed to be created");
+         }
     }
 
 //    public Claims parseToken(String token) {

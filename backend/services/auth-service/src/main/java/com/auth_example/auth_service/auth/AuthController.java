@@ -4,8 +4,13 @@ import com.auth_example.auth_service.auth.models.*;
 import com.auth_example.auth_service.encryption.EncryptionService;
 import com.auth_example.auth_service.exceptions.MfaNotEnabledException;
 import com.auth_example.auth_service.jwt.JwtService;
+import com.auth_example.auth_service.mfa.MfaChallengeType;
 import com.auth_example.auth_service.mfa.MfaService;
+import com.auth_example.auth_service.mfa.models.email.EmailValidateResponse;
+import com.auth_example.auth_service.mfa.models.totp.CreateTotpMfaResponse;
+import com.auth_example.auth_service.mfa.models.totp.VerifyTotpMfaResponse;
 import com.auth_example.auth_service.users.UserService;
+import com.auth_example.auth_service.users.models.Mfa;
 import com.auth_example.auth_service.users.models.User;
 import com.auth_example.common_service.core.responses.ApiResponse;
 import com.auth_example.common_service.jwt.TokenPurpose;
@@ -15,8 +20,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -45,7 +48,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<RegisterResponse>> register(@RequestBody @Valid RegisterRequest request) throws JOSEException {
+    public ResponseEntity<ApiResponse<RegisterResponse>> register(@RequestBody @Valid RegisterRequest request) {
         log.info("INFO :: start registration");
         // check if user email already exist, and return if it exists
         userService.checkIfUserEmailExist(request.email());
@@ -65,16 +68,16 @@ public class AuthController {
     }
 
     @PostMapping("/register/verify")
-    public ResponseEntity<ApiResponse<MfaNotEnabledResponse>> verify(HttpServletRequest httpRequest, @RequestBody @Valid VerifyRegistrationRequest request) throws JOSEException {
+    public ResponseEntity<ApiResponse<MfaNotEnabledResponse>> verify(HttpServletRequest httpRequest, @RequestBody @Valid VerifyRegistrationRequest request) {
         // decrypt challenge id
         UUID challengeId = encryptionService.decryptUuid(request.challengeId());
 
         // check with challenge service for otp
         String email = httpRequest.getHeader("X-User-Email");
-        String responseEmail = mfaService.verifyRegisterEmail(email, challengeId, request.code());
+        EmailValidateResponse mfaResponse = mfaService.verifyRegisterEmail(email, challengeId, request.code());
 
         // create user with user service
-        User user = userService.createUser(responseEmail);
+        User user = userService.createUser(mfaResponse.email(), mfaResponse.type());
 
         // prompt user to enable mfa
         // this occurrence is special because:
@@ -85,24 +88,53 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody @Valid LoginRequest request) throws JOSEException {
+    public ResponseEntity<ApiResponse<LoginMfaResponse>> login(@RequestBody @Valid LoginRequest request) {
         // call user to check pw
         User user = userService.validatePassword(request);
         // check is mfa enabled
-        if (!user.getMfa().isEnabled()) {
+        Mfa userMfa = user.getMfa();
+        if (!userMfa.isEnabled()) {
             String token = jwtService.generateTransitionalToken(user.getEmail(), TokenPurpose.VERIFY_MFA);
             throw new MfaNotEnabledException("mfa has not been enabled", token);
         }
+
+        // initiate mfa method
+        String encryptedChallengeId = "";
+        UUID challengeId = mfaService.verifyLogin(userMfa.getMethod(), userMfa.getTarget());
+        if (challengeId != null) {
+            encryptedChallengeId = encryptionService.encryptUuid(challengeId);
+        }
+
         // generate user token
-        String token = jwtService.generateUserToken(user.getEmail(), TokenPurpose.AUTHORIZATION);
+        String token = jwtService.generateTransitionalToken(user.getEmail(), TokenPurpose.VERIFY_MFA);
+        LoginMfaResponse response = new LoginMfaResponse(token, userMfa.getMethod(), encryptedChallengeId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/login/email/verify")
+    public ResponseEntity<ApiResponse<LoginResponse>> verifyLoginByEmail(HttpServletRequest httpRequest, @RequestBody @Valid VerifyEmailMfaRequest request) {
+        // decrypt challenge id
+        UUID challengeId = encryptionService.decryptUuid(request.challengeId());
+
+        // check with mfa service on code
+        String email = httpRequest.getHeader("X-User-Email");
+        EmailValidateResponse mfaResponse = mfaService.verifyEmail(email, challengeId, request.code());
+
+        // update user
+        userService.enableMfa(email, mfaResponse.type(), mfaResponse.email());
+
+        // generate user token
+        String token = jwtService.generateUserToken(mfaResponse.email(), TokenPurpose.AUTHORIZATION);
+
         LoginResponse response = new LoginResponse(token);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PostMapping("/mfa/email/initiate")
-    public ResponseEntity<ApiResponse<MfaInitiateResponse>> initiateEmailMfa(@RequestBody @Valid MfaEmailInitiateRequest request) {
+    public ResponseEntity<ApiResponse<MfaInitiateResponse>> initiateEmailMfa(HttpServletRequest httpRequest) {
         // create challenge
-        UUID challengeId = mfaService.createEmailMfa(request.email());
+        String email = httpRequest.getHeader("X-User-Email");
+        UUID challengeId = mfaService.createEmailMfa(email);
 
         // encrypt challenge id
         String encryptedUuid = encryptionService.encryptUuid(challengeId);
@@ -112,27 +144,34 @@ public class AuthController {
     }
 
     @PostMapping("/mfa/sms/initiate")
-    public ResponseEntity<ApiResponse<MfaInitiateResponse>> initiateSmsMfa(HttpServletRequest httpRequest, @RequestBody @Valid MfaSmsInitiateRequest request) {
+    public ResponseEntity<ApiResponse<MfaInitiateResponse>> initiateSmsMfa(HttpServletRequest httpRequest) {
         String email = httpRequest.getHeader("X-User-Email");
 
         MfaInitiateResponse response = new MfaInitiateResponse("aa");
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PostMapping("/mfa/email/verify")
-    public ResponseEntity<ApiResponse<LoginResponse>> verifyEmailMfa(HttpServletRequest httpRequest, @RequestBody @Valid VerifyEmailMfaRequest request) throws JOSEException {
-        // decrypt challenge id
-        UUID challengeId = encryptionService.decryptUuid(request.challengeId());
-
-        // check with mfa service on code
+    @PostMapping("/mfa/totp/initiate")
+    public ResponseEntity<ApiResponse<TotpMfaInitiateResponse>> initiateTotpMfa(HttpServletRequest httpRequest) {
+        // get shared secret and qrcode
         String email = httpRequest.getHeader("X-User-Email");
-        String responseEmail = mfaService.verifyEmail(email, challengeId, request.code());
+        CreateTotpMfaResponse mfaResponse = mfaService.createTotpMfa(email);
 
-        // update user
-        userService.enableMfa(email);
+        TotpMfaInitiateResponse response = new TotpMfaInitiateResponse(mfaResponse.secret(), mfaResponse.qrCodeUrl());
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/mfa/login/totp/verify")
+    public ResponseEntity<ApiResponse<LoginResponse>> verifyLoginByTotp(HttpServletRequest httpRequest, @RequestBody @Valid VerifyTotpMfaRequest request) {
+        // get shared secret and qrcode
+        String email = httpRequest.getHeader("X-User-Email");
+        VerifyTotpMfaResponse mfaResponse = mfaService.verifyTotp(email, request.code());
+
+        // update user mfa
+        userService.enableMfa(email, mfaResponse.type(), "");
 
         // generate user token
-        String token = jwtService.generateUserToken(responseEmail, TokenPurpose.AUTHORIZATION);
+        String token = jwtService.generateUserToken(mfaResponse.email(), TokenPurpose.AUTHORIZATION);
 
         LoginResponse response = new LoginResponse(token);
         return ResponseEntity.ok(ApiResponse.success(response));

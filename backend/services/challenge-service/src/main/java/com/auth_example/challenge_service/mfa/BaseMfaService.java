@@ -1,5 +1,9 @@
 package com.auth_example.challenge_service.mfa;
 
+import com.google.zxing.WriterException;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,7 +14,7 @@ public interface BaseMfaService<
         > {
 
     MfaChallengeType getType();
-    BaseMfaChallenge create(A request);
+    BaseMfaChallenge create(A request) throws NoSuchAlgorithmException, IOException, WriterException;
     BaseMfaChallenge validate(B request);
     BaseMfaChallenge findOneById(UUID challengeId);
     BaseMfaChallenge findOneOrThrow(C request);

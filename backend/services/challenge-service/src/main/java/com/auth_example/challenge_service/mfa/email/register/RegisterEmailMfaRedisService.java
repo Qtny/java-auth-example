@@ -17,7 +17,7 @@ import java.util.UUID;
 public class RegisterEmailMfaRedisService implements BaseRedisService<EmailMfaChallenge> {
 
     private final RedisTemplate<String, EmailMfaChallenge> emailMfaTemplate;
-    private static final String CHALLENGE_BY_ID_KEY_PREFIX = "mfa:challenge:registration:email:";
+    private static final String CHALLENGE_BY_ID_KEY_PREFIX = "mfa:challenge:registration:id:";
     private static final String CHALLENGE_BY_EMAIL_KEY_PREFIX = "mfa:challenge:registration:email:";
 
     @Override

@@ -4,7 +4,6 @@ import com.auth_example.challenge_service.mfa.email.models.*;
 import com.auth_example.challenge_service.mfa.models.CreateMfaResponse;
 import com.auth_example.challenge_service.mfa.email.register.RegisterEmailMfaService;
 import com.auth_example.common_service.core.responses.ApiResponse;
-import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

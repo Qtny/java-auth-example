@@ -5,6 +5,7 @@ import com.auth_example.user_service.users.models.api.CreateUserRequest;
 import com.auth_example.user_service.users.models.User;
 import com.auth_example.user_service.users.models.UserResponse;
 import com.auth_example.user_service.users.models.api.UpdateMfaRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,8 +72,16 @@ public class UserController {
     @PatchMapping("/mfa/enable")
     public ResponseEntity<ApiResponse<Void>> updateMfa(@RequestBody @Valid UpdateMfaRequest request) {
         // update user mfa
-        userService.enableMfa(request.email());
+        userService.enableMfa(request.email(), request.type(), request.target());
 
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @DeleteMapping("/mfa")
+    public ResponseEntity<ApiResponse<String>> removeMfa(HttpServletRequest httpRequest) {
+        String email = httpRequest.getHeader("X-User-Email");
+        userService.removeMfa(email);
+
+        return ResponseEntity.ok(ApiResponse.success("mfa successfully removed"));
     }
 }

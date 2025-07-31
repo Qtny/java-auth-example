@@ -4,6 +4,7 @@ import com.auth_example.auth_service.auth.models.LoginRequest;
 import com.auth_example.auth_service.exceptions.EmailAlreadyExistException;
 import com.auth_example.auth_service.exceptions.InvalidEmailPasswordException;
 import com.auth_example.auth_service.exceptions.RedisUserNotFoundException;
+import com.auth_example.auth_service.mfa.MfaChallengeType;
 import com.auth_example.auth_service.redis.RedisService;
 import com.auth_example.auth_service.users.models.NewUser;
 import com.auth_example.auth_service.users.models.User;
@@ -35,7 +36,7 @@ public class UserService {
         return userClient.findOneByEmail(email);
     }
 
-    public User createUser(String email) {
+    public User createUser(String email, MfaChallengeType mfaMethod) {
         // find temporary redis user
         Optional<NewUser> redisAttempt = redisService.findNewUserByEmail(email);
         if (redisAttempt.isEmpty()) {
@@ -43,6 +44,7 @@ public class UserService {
         }
 
         NewUser newUser = redisAttempt.get();
+
         return userClient.create(newUser);
     }
 
@@ -57,7 +59,7 @@ public class UserService {
         return user;
     }
 
-    public void enableMfa(String email) {
-        userClient.enableMfa(email);
+    public void enableMfa(String email, MfaChallengeType type, String target) {
+        userClient.enableMfa(email, type, target);
     }
 }

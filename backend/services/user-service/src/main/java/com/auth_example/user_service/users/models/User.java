@@ -36,7 +36,7 @@ public class User {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    private UserStatus status = UserStatus.PENDING_EMAIL_VERIFICATION;
+    private UserStatus status = UserStatus.PENDING_MFA;
 
     @Column(nullable = false)
     private String email;

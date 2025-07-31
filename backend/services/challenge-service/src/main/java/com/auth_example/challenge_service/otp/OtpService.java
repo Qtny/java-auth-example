@@ -21,7 +21,7 @@ public class OtpService {
         SecureRandom random = new SecureRandom();
         StringBuilder otp = new StringBuilder();
 
-        for (int i = 0; i <= length; i++) {
+        for (int i = 0; i < length; i++) {
             int index = random.nextInt(digits.length());
             otp.append(digits.charAt(index));
         }

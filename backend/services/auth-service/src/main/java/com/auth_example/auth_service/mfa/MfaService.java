@@ -1,11 +1,15 @@
 package com.auth_example.auth_service.mfa;
 
 import com.auth_example.auth_service.auth.models.RegisterRequest;
+import com.auth_example.auth_service.exceptions.ApiNotSuccessException;
 import com.auth_example.auth_service.mfa.models.CreateMfaResponse;
 import com.auth_example.auth_service.mfa.models.email.EmailValidateResponse;
+import com.auth_example.auth_service.mfa.models.totp.CreateTotpMfaResponse;
+import com.auth_example.auth_service.mfa.models.totp.VerifyTotpMfaResponse;
 import com.auth_example.auth_service.redis.RedisService;
 import com.auth_example.auth_service.users.UserDtoMapperImpl;
 import com.auth_example.auth_service.users.models.NewUser;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,7 +28,8 @@ public class MfaService {
     private final MfaClient mfaClient;
     private final RedisService redisService;
     private final UserDtoMapperImpl userMapper;
-    private final PasswordEncoder passwordEncoder  = new BCryptPasswordEncoder(12);;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+    ;
 
     public UUID createRegistrationMfa(RegisterRequest request) {
         Optional<NewUser> redisUser = redisService.findNewUserByEmail(request.email());
@@ -50,13 +55,30 @@ public class MfaService {
         return response.challengeId();
     }
 
-    public String verifyRegisterEmail(String email, UUID challengeId, String code) {
-        EmailValidateResponse response = mfaClient.verifyRegisterMfa(email, challengeId, code);
-        return response.email();
+    public EmailValidateResponse verifyRegisterEmail(String email, UUID challengeId, String code) {
+        return mfaClient.verifyRegisterMfa(email, challengeId, code);
     }
 
-    public String verifyEmail(String email, UUID challengeId, String code) {
-        EmailValidateResponse response = mfaClient.verifyEmailMfa(email, challengeId, code);
-        return response.email();
+    public EmailValidateResponse verifyEmail(String email, UUID challengeId, String code) {
+        return mfaClient.verifyEmailMfa(email, challengeId, code);
+    }
+
+    public UUID verifyLogin(MfaChallengeType method, String target) {
+        // split the types
+        CreateMfaResponse response = switch (method) {
+            case EMAIL -> mfaClient.createEmailMfa(target);
+            default -> throw new ApiNotSuccessException("LMAO");
+        };
+
+        return response.challengeId();
+    }
+
+    public CreateTotpMfaResponse createTotpMfa(String email) {
+        return mfaClient.setupTotpMfa(email);
+    }
+
+    public VerifyTotpMfaResponse verifyTotp(String email, String code) {
+        // verify code
+        return mfaClient.verifyTotpMfa(email, code);
     }
 }

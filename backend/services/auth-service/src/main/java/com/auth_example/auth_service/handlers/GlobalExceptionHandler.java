@@ -63,6 +63,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.ok(ApiResponse.failure(response));
     }
 
+    @ExceptionHandler(TokenCreationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTokenCreationException(TokenCreationException exception) {
+        ApiError error = new ApiError(TOKEN_ERROR, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(error));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException
             (MethodArgumentNotValidException exception)

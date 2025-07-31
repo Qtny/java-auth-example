@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>TOTP Setup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        img {
+            margin-top: 15px;
+            max-width: 100%;
+            height: auto;
+        }
+        .qr-code-container {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Set Up Your Two-Factor Authentication</h2>
+    <p>To complete your TOTP setup, please scan the QR code below using your authenticator app (such as Google
+        Authenticator or Authy):</p>
+    <div class="qr-code-container">
+        <img th:src="${qrCodeUrl}" alt="TOTP QR Code">
+    </div>
+    <p>If you're unable to scan the code, please contact support for assistance.</p>
+</div>
+</body>
+</html>

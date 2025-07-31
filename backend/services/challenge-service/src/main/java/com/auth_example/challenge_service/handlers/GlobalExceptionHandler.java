@@ -1,8 +1,6 @@
 package com.auth_example.challenge_service.handlers;
 
-import com.auth_example.challenge_service.exceptions.ChallengeNotFoundException;
-import com.auth_example.challenge_service.exceptions.CodeDoesNotMatchException;
-import com.auth_example.challenge_service.exceptions.EmailMismatchException;
+import com.auth_example.challenge_service.exceptions.*;
 import com.auth_example.common_service.core.responses.ApiError;
 import com.auth_example.common_service.core.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
@@ -38,6 +36,22 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError(UNAUTHORIZED, exception.getMessage());
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(error));
+    }
+
+    @ExceptionHandler(TotpProfileNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTotpProfileNotFoundException(TotpProfileNotFoundException exception) {
+        ApiError error = new ApiError(ENTITY_NOT_FOUND, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(error));
+    }
+
+    @ExceptionHandler(ErrorGeneratingQRException.class)
+    public ResponseEntity<ApiResponse<Void>> handleErrorGeneratingQRException(ErrorGeneratingQRException exception) {
+        ApiError error = new ApiError(ASSET_GENERATION_ERROR, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(error));
     }
 

@@ -8,6 +8,7 @@ public record UserResponse(
     UUID id,
     String firstName,
     String lastName,
+    String email,
     boolean mfaEnabled,
     UserStatus status,
     Address address

@@ -37,7 +37,9 @@ public class SecurityConfig {
                         .hasRole("OTP")
                         .pathMatchers(
                                 "/api/v1/auth/mfa/email/initiate",
-                                "/api/v1/auth/mfa/email/verify"
+                                "/api/v1/auth/login/email/verify",
+                                "/api/v1/auth/mfa/totp/initiate",
+                                "/api/v1/auth/mfa/login/totp/verify"
                         )
                         .hasRole("MFA")
                         .anyExchange().hasRole("USER")

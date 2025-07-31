@@ -6,6 +6,10 @@ import com.auth_example.auth_service.mfa.models.*;
 import com.auth_example.auth_service.mfa.models.email.EmailValidateResponse;
 import com.auth_example.auth_service.mfa.models.email.VerifyEmailMfaPayload;
 import com.auth_example.auth_service.mfa.models.email.CreateEmailMfaPayload;
+import com.auth_example.auth_service.mfa.models.totp.CreateTotpMfaPayload;
+import com.auth_example.auth_service.mfa.models.totp.CreateTotpMfaResponse;
+import com.auth_example.auth_service.mfa.models.totp.VerifyTotpMfaPayload;
+import com.auth_example.auth_service.mfa.models.totp.VerifyTotpMfaResponse;
 import com.auth_example.common_service.core.responses.ApiResponse;
 import com.auth_example.common_service.core.rest.BaseRestClient;
 import com.auth_example.common_service.core.rest.RequestOption;
@@ -62,7 +66,7 @@ public class MfaClient {
 
 
     public EmailValidateResponse verifyEmailMfa(String email, UUID challengeId, String code) {
-        log.info("sending email verification to [challenge service]");
+        log.info("verifying email mfa code with [challenge service]");
         VerifyEmailMfaPayload payload = new VerifyEmailMfaPayload(email, challengeId, code);
         String uri = MFA_BASE_URL + "/email/verify";
         ApiResponse<EmailValidateResponse> response = restClient.post(uri, payload, RequestOption.internalNone(), EmailValidateResponse.class);
@@ -77,6 +81,34 @@ public class MfaClient {
         log.info("finding existing challenge");
         String uri = MFA_BASE_URL + "/register/email/" + email;
         ApiResponse<MfaChallenge> response = restClient.get(uri, RequestOption.internalNone(), MfaChallenge.class);
+        if (!response.isSuccess()) {
+            throw new ApiNotSuccessException("Api error");
+        }
+
         return response.getData().getId();
+    }
+
+    public CreateTotpMfaResponse setupTotpMfa(String email) {
+        log.info("creating mfa challenge for totp");
+        CreateTotpMfaPayload payload = new CreateTotpMfaPayload(email, MfaChallengeType.TOTP);
+        String uri = MFA_BASE_URL + "/totp";
+        ApiResponse<CreateTotpMfaResponse> response = restClient.post(uri, payload, RequestOption.internalNone(), CreateTotpMfaResponse.class);
+        if (!response.isSuccess()) {
+            throw new ApiNotSuccessException("Api error");
+        }
+
+        return response.getData();
+    }
+
+    public VerifyTotpMfaResponse verifyTotpMfa(String email, String code) {
+        log.info("verifying totp mfa code with [challenge service]");
+        VerifyTotpMfaPayload payload = new VerifyTotpMfaPayload(email, code);
+        String uri = MFA_BASE_URL + "/totp/verify";
+        ApiResponse<VerifyTotpMfaResponse> response = restClient.post(uri, payload, RequestOption.internalNone(), VerifyTotpMfaResponse.class);
+        if (!response.isSuccess()) {
+            throw new ApiNotSuccessException("Api error");
+        }
+
+        return response.getData();
     }
 }

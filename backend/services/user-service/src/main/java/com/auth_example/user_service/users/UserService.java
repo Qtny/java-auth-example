@@ -5,10 +5,12 @@ import com.auth_example.user_service.exceptions.UserNotFoundException;
 import com.auth_example.user_service.exceptions.DuplicatedEmailException;
 import com.auth_example.user_service.users.models.api.CreateUserRequest;
 import com.auth_example.user_service.users.models.*;
+import com.auth_example.user_service.users.models.api.UpdateMfaRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,23 +42,6 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
-//    public User enableMfa(UUID userId, @Valid CreateMfaRequest request) {
-//        User user = userRepository.findOneById(userId)
-//                .orElseThrow(() -> new UserNotFoundException("user with id " + userId + " does not exist"));
-//
-//        Mfa userMfa = user.getMfa();
-//        boolean isMfaEnabled = userMfa.isEnabled();
-//        if (isMfaEnabled) {
-//            throw new UserMfaAlreadyEnabledException("this user has already enabled mfa");
-//        }
-//
-//        userMfa.setEnabled(true);
-//        userMfa.setTarget(request.target());
-//        userMfa.setMethod(request.method());
-//
-//        return userRepository.save(user);
-//    }
-
     public UserResponse sanitizeUser(User user) {
         return mapper.userToUserResponse(user);
     }
@@ -66,17 +51,32 @@ public class UserService {
         return user.isPresent();
     }
 
-    public void enableMfa(String email) {
+    public void enableMfa(String email, MfaMethod type, String target) {
         User user = userRepository.findOneByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("user with email " + email + " does not exist"));
 
         Mfa userMfa = user.getMfa();
         boolean isMfaEnabled = userMfa.isEnabled();
         if (isMfaEnabled) {
-            throw new UserMfaAlreadyEnabledException("this user has already enabled mfa");
+            return;
         }
 
+        user.setStatus(UserStatus.ACTIVE);
         userMfa.setEnabled(true);
+        userMfa.setMethod(type);
+        userMfa.setTarget(target);
+        userMfa.setLastVerifiedDate(LocalDate.now());
+        userRepository.save(user);
+    }
+
+    public void removeMfa(String email) {
+        User user = userRepository.findOneByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("user with email " + email + " does not exist"));
+
+        Mfa userMfa = user.getMfa();
+        userMfa.setEnabled(false);
+        userMfa.setMethod(null);
+        userMfa.setTarget("");
         userRepository.save(user);
     }
 }

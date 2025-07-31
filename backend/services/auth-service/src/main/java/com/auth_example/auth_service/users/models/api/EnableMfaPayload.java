@@ -1,6 +1,10 @@
 package com.auth_example.auth_service.users.models.api;
 
+import com.auth_example.auth_service.mfa.MfaChallengeType;
+
 public record EnableMfaPayload(
-        String email
+        String email,
+        MfaChallengeType type,
+        String target
 ) {
 }
