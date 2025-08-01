@@ -1,0 +1,74 @@
+<div class="flex gap-2 justify-center">
+  <input
+    #otp0
+    type="text"
+    maxlength="1"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    [disabled]="completed"
+    (input)="onInput($event, 0)"
+    (keydown)="onKeyDown($event, 0)"
+    class="border-2 focus:outline-none focus:ring-4 focus:ring-blue-600 font-semibold rounded-md border-blue-300 h-32 w-28 text-4xl text-center"
+    [class]="completed ? 'text-gray-400 bg-gray-100' : 'text-black bg-white'"
+  />
+  <input
+    #otp1
+    type="text"
+    maxlength="1"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    [disabled]="completed"
+    (input)="onInput($event, 1)"
+    (keydown)="onKeyDown($event, 1)"
+    class="border-2 focus:outline-none focus:ring-4 focus:ring-blue-600 font-semibold rounded-md border-blue-300 h-32 w-28 text-4xl text-center"
+    [class]="completed ? 'text-gray-400 bg-gray-100' : 'text-black bg-white'"
+  />
+  <input
+    #otp2
+    type="text"
+    maxlength="1"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    [disabled]="completed"
+    (input)="onInput($event, 2)"
+    (keydown)="onKeyDown($event, 2)"
+    class="border-2 focus:outline-none focus:ring-4 focus:ring-blue-600 font-semibold rounded-md border-blue-300 h-32 w-28 text-4xl text-center"
+    [class]="completed ? 'text-gray-400 bg-gray-100' : 'text-black bg-white'"
+  />
+  <input
+    #otp3
+    type="text"
+    maxlength="1"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    [disabled]="completed"
+    (input)="onInput($event, 3)"
+    (keydown)="onKeyDown($event, 3)"
+    class="border-2 focus:outline-none focus:ring-4 focus:ring-blue-600 font-semibold rounded-md border-blue-300 h-32 w-28 text-4xl text-center"
+    [class]="completed ? 'text-gray-400 bg-gray-100' : 'text-black bg-white'"
+  />
+  <input
+    #otp4
+    type="text"
+    maxlength="1"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    [disabled]="completed"
+    (input)="onInput($event, 4)"
+    (keydown)="onKeyDown($event, 4)"
+    class="border-2 focus:outline-none focus:ring-4 focus:ring-blue-600 font-semibold rounded-md border-blue-300 h-32 w-28 text-4xl text-center"
+    [class]="completed ? 'text-gray-400 bg-gray-100' : 'text-black bg-white'"
+  />
+  <input
+    #otp5
+    type="text"
+    maxlength="1"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    [disabled]="completed"
+    (input)="onInput($event, 5)"
+    (keydown)="onKeyDown($event, 5)"
+    class="border-2 focus:outline-none focus:ring-4 focus:ring-blue-600 font-semibold rounded-md border-blue-300 h-32 w-28 text-4xl text-center"
+    [class]="completed ? 'text-gray-400 bg-gray-100' : 'text-black bg-white'"
+  />
+</div>

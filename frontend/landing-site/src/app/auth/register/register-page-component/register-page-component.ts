@@ -3,7 +3,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
@@ -19,6 +19,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
   templateUrl: './register-page-component.html',
 })
 export class RegisterPageComponent {
+  private readonly router = inject(Router);
   passwordIndicator = signal(true);
   private readonly formBuilder = inject(FormBuilder);
 
@@ -58,6 +59,8 @@ export class RegisterPageComponent {
 
     console.log('this is the form');
     console.log(newUser);
+
+    this.router.navigate(['/signup/otp']);
   }
 }
 

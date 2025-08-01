@@ -1,1 +1,27 @@
-<p>register-otp-page-component works!</p>
+<div class="h-screen w-full bg-blue-200 flex justify-center items-center">
+  <div
+    class="flex flex-col justify-center items-center h-full w-fit px-32 gap-10 bg-white"
+  >
+    <img src="./logo.svg" class="size-30 p-4" alt="">
+
+    <h4 class="font-medium text-lg text-center">
+      We have sent a 6 digits One Time Pin (OTP) to your email to check for
+      email validity
+    </h4>
+
+    <!-- 6 boxes -->
+    <app-otp-input-component [completed]="isSubmit()" (onCompleted)="handleSubmitOtp($event)" />
+
+    <div class="flex flex-col gap-2 justify-center items-center">
+      <p class="text-center">
+        Please enter your 6 digit pin sent to your email address
+      </p>
+      <a class="font-medium text-blue-600 underline">{{ mockemail }}</a>
+    </div>
+
+    <p class="text-center">
+      Did not receive? Click <a class="underline text-blue-600">here</a> to
+      resent the OTP
+    </p>
+  </div>
+</div>
