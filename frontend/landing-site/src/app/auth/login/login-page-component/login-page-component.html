@@ -1,1 +1,49 @@
-<p>login-page-component works!</p>
+<div class="flex flex-col justify-center items-center h-screen">
+  <div
+    class="px-20 py-12 flex flex-col justify-center items-center gap-8 border border-blue-200 rounded-xl bg-blue-100"
+  >
+    <!-- title -->
+    <h1 class="text-4xl font-semibold text-blue-950 pb-4">Auth Example</h1>
+    <!-- form -->
+    <form [formGroup]="loginForm" (submit)="submitLogin()" class="flex flex-col">
+      <mat-form-field>
+        <mat-label>Email address</mat-label>
+        <input matInput formControlName="email" />
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Password</mat-label>
+        <input matInput formControlName="password" [type]="passwordIndicator() ? 'password' : 'text'" />
+        <button
+          matIconButton
+          type="button"
+          matSuffix
+          (click)="togglePassword($event)"
+          [attr.aria-label]="'Hide password'"
+          [attr.aria-pressed]="passwordIndicator()"
+        >
+          <mat-icon>{{
+            passwordIndicator() ? "visibility_off" : "visibility_on"
+          }}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <div class="flex w-full justify-center items-center pt-4">
+        <button
+          matButton
+          class="!bg-blue-500 hover:!bg-blue-400 !rounded-lg !text-white !font-medium !w-fit !px-8"
+        >
+          Log in
+        </button>
+      </div>
+    </form>
+
+    <p class="text-sm">
+      Not a member yet?
+      <span class="text-blue-500 font-medium">
+        <a [routerLink]="['/signup']">Register</a>
+      </span>
+      now
+    </p>
+  </div>
+</div>

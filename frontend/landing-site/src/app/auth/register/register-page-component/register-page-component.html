@@ -1,1 +1,109 @@
-<p>register-page-component works!</p>
+<div class="flex flex-col justify-center items-center h-screen">
+  <div
+    class="px-20 py-12 flex flex-col justify-center items-center gap-8 border border-blue-200 rounded-xl bg-blue-100"
+  >
+    <!-- title -->
+    <h1 class="text-4xl font-semibold text-blue-950 pb-4">Auth Example</h1>
+    <!-- form -->
+    <form [formGroup]="registerUserForm" (submit)="submitRegister()" class="flex flex-col gap-2">
+      <div class="flex flex-col gap-2">
+        <label for="" class="font-medium">Name :</label>
+
+        <div class="flex gap-4">
+          <mat-form-field>
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName" />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="" class="font-medium">Email Address :</label>
+        <mat-form-field>
+          <mat-label>Email address</mat-label>
+          <input matInput formControlName="email" />
+        </mat-form-field>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="" class="font-medium">Password :</label>
+        <mat-form-field>
+          <mat-label>Password</mat-label>
+          <input matInput [type]="passwordIndicator() ? 'password' : 'text'" formControlName="password" />
+          <button
+            matIconButton
+            matSuffix
+            type="button"
+            (click)="togglePassword($event)"
+            [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="passwordIndicator()"
+          >
+            <mat-icon>{{
+              passwordIndicator() ? "visibility_off" : "visibility_on"
+            }}</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="" class="font-medium">Address</label>
+
+        <mat-form-field>
+          <mat-label>Street address 1</mat-label>
+          <input matInput formControlName="street1" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Street address 2</mat-label>
+          <input matInput formControlName="street2" />
+        </mat-form-field>
+
+        <div class="flex gap-4">
+          <mat-form-field>
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city" />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Postal Code</mat-label>
+            <input matInput formControlName="postalCode" />
+          </mat-form-field>
+        </div>
+
+        <div class="flex gap-4">
+          <mat-form-field>
+            <mat-label>State</mat-label>
+            <input matInput formControlName="state" />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Country</mat-label>
+            <input matInput formControlName="country" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="flex w-full justify-center items-center pt-4">
+        <button
+          matButton
+          class="!bg-blue-500 hover:!bg-blue-400 !rounded-lg !text-white !font-medium !w-fit !px-8"
+        >
+          Register
+        </button>
+      </div>
+    </form>
+
+    <p class="text-sm">
+      Already a member?
+      <span class="text-blue-500 font-medium">
+        <a [routerLink]="['/signin']">Login</a>
+      </span>
+      now
+    </p>
+  </div>
+</div>
