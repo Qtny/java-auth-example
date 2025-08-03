@@ -3,7 +3,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
@@ -20,6 +20,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 export class LoginPageComponent {
   passwordIndicator = signal(true);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly router = inject(Router);
 
   protected readonly loginForm = this.formBuilder.group({
     email: ['', Validators.required],
@@ -39,6 +40,8 @@ export class LoginPageComponent {
 
     console.log('this user is logging in');
     console.log(loginUser);
+
+    this.router.navigate(["/signin/enable-mfa"])
   }
 }
 

@@ -1,3 +1,8 @@
 @import "tailwindcss";
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.mdc-text-field--filled {
+  background-color: rgb(246, 252, 255) !important;
+  border-radius: 8px;
+}

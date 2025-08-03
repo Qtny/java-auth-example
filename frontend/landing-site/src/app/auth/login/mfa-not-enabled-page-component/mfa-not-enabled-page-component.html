@@ -1,0 +1,92 @@
+<div class="h-screen w-full bg-blue-200 flex justify-center items-center">
+  <div
+    class="flex flex-col justify-center items-center h-full w-fit min-w-1/2 px-32 gap-10 bg-white"
+  >
+    <img src="./unlock.svg" class="size-42 p-4" alt="" />
+
+    <div>
+      <h4 class="font-medium text-lg text-center">
+        You have not enable
+        <span class="text-blue-900 font-semibold"
+          >Multi-Factor Authentication (MFA)</span
+        >
+        yet!
+      </h4>
+      <h4 class="font-medium text-lg text-center">Let's help you set it up!</h4>
+    </div>
+
+    <h4 class="text-lg">Please select one of the below</h4>
+    <div class="flex gap-10">
+      <div
+        class="flex flex-col justify-center items-center gap-3 group"
+        (click)="onTriggerMfa(MfaChallengeType.EMAIL)"
+      >
+        <!-- email otp -->
+        <div
+          class="size-20 text-white hover:ring-2 hover:ring-blue-400 hover:ring-offset-4 bg-blue-400 hover:bg-blue-300 cursor-pointer border border-blue-300 rounded-md p-3 transition-all ease-in-out"
+          title="email otp"
+        >
+          <mat-icon
+            svgIcon="email-mfa"
+            style="height: 100%; width: 100%"
+            title="email otp"
+          />
+        </div>
+
+        <div
+          class="text-center text-blue-400 font-medium text-base opacity-0 group-hover:opacity-100 ease-in-out transition-all"
+        >
+          <p>Email</p>
+        </div>
+      </div>
+      <!-- sms otp -->
+      <div
+        class="flex flex-col justify-center items-center gap-3 group"
+        (click)="onTriggerMfa(MfaChallengeType.SMS)"
+      >
+        <!-- email otp -->
+        <div
+          class="size-20 text-white hover:ring-2 hover:ring-blue-400 hover:ring-offset-4 bg-blue-400 hover:bg-blue-300 cursor-pointer border border-blue-300 rounded-md p-3 transition-all ease-in-out"
+          title="sms otp"
+        >
+          <mat-icon
+            svgIcon="sms-mfa"
+            style="height: 100%; width: 100%"
+            title="sms otp"
+          />
+        </div>
+
+        <div
+          class="text-center text-blue-400 font-medium text-base opacity-0 group-hover:opacity-100 ease-in-out transition-all"
+        >
+          <p>SMS</p>
+        </div>
+      </div>
+
+      <!-- totp -->
+      <div
+        class="flex flex-col justify-center items-center gap-3 group"
+        (click)="onTriggerMfa(MfaChallengeType.AUTHENTICATOR)"
+      >
+        <!-- email otp -->
+        <div
+          class="size-20 text-white hover:ring-2 hover:ring-blue-400 hover:ring-offset-4 bg-blue-400 hover:bg-blue-300 cursor-pointer border border-blue-300 rounded-md p-3 transition-all ease-in-out"
+          title="authenticator"
+        >
+          <mat-icon
+            svgIcon="authenticator-mfa"
+            style="height: 100%; width: 100%"
+            title="authenticator"
+          />
+        </div>
+
+        <div
+          class="text-center text-blue-400 font-medium text-base opacity-0 group-hover:opacity-100 ease-in-out transition-all"
+        >
+          <p>Auth</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- UcvdZAjBWe -->

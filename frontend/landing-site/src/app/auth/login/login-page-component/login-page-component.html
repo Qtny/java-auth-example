@@ -7,9 +7,9 @@
     <h1 class="text-4xl font-semibold text-blue-950 pb-4">Auth Example</h1>
     <!-- form -->
     <form [formGroup]="loginForm" (submit)="submitLogin()" class="flex flex-col">
-      <mat-form-field>
+      <mat-form-field appearance="fill">
         <mat-label>Email address</mat-label>
-        <input matInput formControlName="email" />
+        <input matInput formControlName="email" class="" />
       </mat-form-field>
 
       <mat-form-field>

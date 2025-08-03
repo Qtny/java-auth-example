@@ -2,21 +2,27 @@
   <div
     class="flex flex-col justify-center items-center h-full w-fit min-w-1/2 px-32 gap-10 bg-white"
   >
-    <img src="./logo.svg" class="size-30 p-4" alt="">
+    <img src="./logo.svg" class="size-30 p-4" alt="" />
 
     <h4 class="font-medium text-lg text-center">
       We have sent a 6 digits One Time Pin (OTP) to your email to check for
       email validity
     </h4>
 
+    <p class="font-bold text-3xl">
+      Verifying via <span class="uppercase text-blue-400">{{ mfaMethod }}</span> OTP method;
+    </p>
+
     <!-- 6 boxes -->
-    <app-otp-input-component [completed]="isSubmit()" (onCompleted)="handleSubmitOtp($event)" />
+    <app-otp-input-component
+      [completed]="isSubmit()"
+      (onCompleted)="handleSubmitOtp($event)"
+    />
 
     <div class="flex flex-col gap-2 justify-center items-center">
       <p class="text-center">
         Please enter your 6 digit pin sent to your email address
       </p>
-      <a class="font-medium text-blue-600 underline">{{ mockemail }}</a>
     </div>
 
     <p class="text-center">

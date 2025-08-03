@@ -13,7 +13,7 @@
       class="flex flex-col gap-2"
     >
       <div class="grid grid-cols-2 gap-10">
-        <div>
+        <div class="flex flex-col justify-between">
           <div class="flex flex-col gap-2">
             <label for="" class="font-medium">Name :</label>
 
@@ -63,10 +63,10 @@
           </div>
         </div>
 
-        <div>
+        <div class="flex flex-col gap-3">
+          <label for="" class="font-medium">Address</label>
+          
           <div class="flex flex-col">
-            <label for="" class="font-medium">Address</label>
-
             <mat-form-field>
               <mat-label>Street address 1</mat-label>
               <input matInput formControlName="street1" />
