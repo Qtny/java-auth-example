@@ -55,9 +55,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.store
       .select(selectIsMfaEnbaled)
-      .pipe(
-        takeUntil(this.destroy$)
-      )
+      .pipe(takeUntil(this.destroy$))
       .subscribe((val) => {
         if (val == null) return;
         if (val) {
@@ -67,23 +65,24 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         return this.router.navigate(['/signin/enable-mfa']);
       });
     // error handling
-    this.store.select(selectError).subscribe((error) => {
-      if (error) {
-        this.store.dispatch(
-          openErrorDialogAction({
-            title: "We can't proceed without your help",
-            description: error,
-          })
-        );
-        console.error('error during creation => ', error);
-      }
-    });
+    this.store
+      .select(selectError)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((error) => {
+        if (error) {
+          this.store.dispatch(
+            openErrorDialogAction({
+              title: "We can't proceed without your help",
+              description: error,
+            })
+          );
+          console.error('error during creation => ', error);
+        }
+      });
     // form handling
     this.store
       .select(selectLoading)
-      .pipe(
-        takeUntil(this.destroy$)
-      )
+      .pipe(takeUntil(this.destroy$))
       .subscribe((val) => {
         if (val) {
           this.loginForm.disable();

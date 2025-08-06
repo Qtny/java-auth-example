@@ -196,7 +196,7 @@ export class LoginEffect {
               return verifyLoginByEmailActionFailure({
                 success: false,
                 errorMessage:
-                  response.error?.message || 'Failed to create a new user',
+                  response.error?.message || 'Failed to confirm otp',
               });
             }),
             catchError((response) =>

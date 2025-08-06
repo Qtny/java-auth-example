@@ -45,17 +45,20 @@ export class VerifyMfaPageComponent implements OnInit, OnDestroy {
         }
       });
     // error handling
-    this.store.select(selectError).subscribe((error) => {
-      if (error) {
-        this.store.dispatch(
-          openErrorDialogAction({
-            title: "We can't proceed without your help",
-            description: error,
-          })
-        );
-        console.error('error during creation => ', error);
-      }
-    });
+    this.store
+      .select(selectError)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((error) => {
+        if (error) {
+          this.store.dispatch(
+            openErrorDialogAction({
+              title: "We can't proceed without your help",
+              description: error,
+            })
+          );
+          console.error('error during creation => ', error);
+        }
+      });
     // form handling
     this.store
       .select(selectLoading)

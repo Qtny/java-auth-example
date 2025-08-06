@@ -33,16 +33,19 @@ export class RegisterOtpPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // error handling
-    this.store.select(selectError).subscribe((error) => {
-      if (error) {
-        this.store.dispatch(
-          openErrorDialogAction({
-            title: 'Your OTP has issue',
-            description: error,
-          })
-        );
-      }
-    });
+    this.store
+      .select(selectError)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((error) => {
+        if (error) {
+          this.store.dispatch(
+            openErrorDialogAction({
+              title: 'Your OTP has issue',
+              description: error,
+            })
+          );
+        }
+      });
     // navigation
     this.store
       .select(selectStep)

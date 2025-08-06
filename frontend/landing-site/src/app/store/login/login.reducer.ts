@@ -13,6 +13,7 @@ import {
   loginActionSuccess,
   resetLoginState,
   verifyLoginByEmailAction,
+  verifyLoginByEmailActionFailure,
   verifyLoginByEmailActionSuccess,
   verifyLoginByTotpAction,
   verifyLoginByTotpActionFailure,
@@ -129,7 +130,7 @@ const loginReducer = createReducer(
     success,
     token: data.token,
   })),
-  on(verifyLoginByTotpActionFailure, (state, { success, errorMessage }) => ({
+  on(verifyLoginByEmailActionFailure, (state, { success, errorMessage }) => ({
     ...state,
     loading: false,
     success,

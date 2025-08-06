@@ -23,7 +23,11 @@ import { distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { openErrorDialogAction } from '../../../store/global/global.action';
 import { RegistrationState } from '../../../store/registration/registration.reducer';
-import { selectError, selectLoading, selectToken } from '../../../store/registration/registration.selector';
+import {
+  selectError,
+  selectLoading,
+  selectToken,
+} from '../../../store/registration/registration.selector';
 
 @Component({
   selector: 'app-register-page-component',
@@ -78,17 +82,20 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
         this.router.navigate(['/signup/otp']);
       });
     // error handling
-    this.store.select(selectError).subscribe((error) => {
-      if (error) {
-        this.store.dispatch(
-          openErrorDialogAction({
-            title: "We can't proceed without your help",
-            description: error,
-          })
-        );
-        console.error('error during creation => ', error);
-      }
-    });
+    this.store
+      .select(selectError)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((error) => {
+        if (error) {
+          this.store.dispatch(
+            openErrorDialogAction({
+              title: "We can't proceed without your help",
+              description: error,
+            })
+          );
+          console.error('error during creation => ', error);
+        }
+      });
     // loading handling
     this.loading$.pipe(takeUntil(this.destroy$)).subscribe((val) => {
       if (val) {
