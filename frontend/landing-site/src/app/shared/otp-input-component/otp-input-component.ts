@@ -25,6 +25,16 @@ export class OtpInputComponent {
 
   ngAfterViewInit() {
     this.otpInputs.first.nativeElement.focus();
+
+    this.otpInputs.forEach((input) => {
+      input.nativeElement.addEventListener(
+        'paste',
+        (event: ClipboardEvent) => {
+          this.onPaste(event);
+        },
+        true
+      );
+    });
   }
 
   onInput(event: Event, index: number): void {
@@ -69,6 +79,7 @@ export class OtpInputComponent {
     event.preventDefault();
 
     const pasteData = event.clipboardData?.getData('text') || '';
+    console.log('[ONPASTE] :: pasted data', pasteData);
     const digits = pasteData.replace(/\D/g, '').slice(0, 6).split('');
 
     digits.forEach((digit, i) => {
