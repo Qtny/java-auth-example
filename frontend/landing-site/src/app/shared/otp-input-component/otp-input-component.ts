@@ -1,4 +1,13 @@
-import { Component, ElementRef, EventEmitter, Input, Output, QueryList, signal, ViewChildren } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  QueryList,
+  signal,
+  ViewChildren,
+} from '@angular/core';
 
 @Component({
   selector: 'app-otp-input-component',
@@ -56,9 +65,35 @@ export class OtpInputComponent {
     }
   }
 
+  onPaste(event: ClipboardEvent) {
+    event.preventDefault();
+
+    const pasteData = event.clipboardData?.getData('text') || '';
+    const digits = pasteData.replace(/\D/g, '').slice(0, 6).split('');
+
+    digits.forEach((digit, i) => {
+      this.otp[i] = digit;
+      const input = this.otpInputs.toArray()[i];
+      if (input) {
+        input.nativeElement.value = digit;
+      }
+    });
+
+    const lastIndex = digits.length - 1;
+    if (lastIndex < this.otpInputs.length - 1) {
+      this.otpInputs.toArray()[lastIndex + 1].nativeElement.focus();
+    } else {
+      this.otpInputs.toArray()[lastIndex].nativeElement.blur();
+    }
+
+    if (this.otp.every((num) => num.length === 1)) {
+      this.onSubmitOtp();
+    }
+  }
+
   onSubmitOtp() {
     const code = this.otp.join('');
     this.onCompleted.emit(code);
-    this.otpInputs.forEach(el => el.nativeElement.blur());
+    this.otpInputs.forEach((el) => el.nativeElement.blur());
   }
 }

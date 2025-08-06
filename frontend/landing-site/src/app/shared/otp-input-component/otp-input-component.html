@@ -20,6 +20,7 @@
     [disabled]="completed"
     (input)="onInput($event, 1)"
     (keydown)="onKeyDown($event, 1)"
+    (paste)="onPaste($event)"
     class="border-2 focus:outline-none focus:ring-4 focus:ring-blue-600 font-semibold rounded-md border-blue-300 h-32 w-28 text-4xl text-center"
     [class]="completed ? 'text-gray-400 bg-gray-100' : 'text-black bg-white'"
   />

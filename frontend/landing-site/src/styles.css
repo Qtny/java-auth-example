@@ -6,3 +6,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   background-color: rgb(246, 252, 255) !important;
   border-radius: 8px;
 }
+
+.mdc-text-field--filled:disabled {
+  background-color: rgb(149, 165, 173) !important;
+  cursor: not-allowed;
+}

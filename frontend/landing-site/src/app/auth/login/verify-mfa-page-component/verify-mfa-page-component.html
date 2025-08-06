@@ -10,7 +10,9 @@
     </h4>
 
     <p class="font-bold text-3xl">
-      Verifying via <span class="uppercase text-blue-400">{{ mfaMethod }}</span> OTP method;
+      Verifying via
+      <span class="uppercase text-blue-400">{{ mfaMethod$ | async }}</span> OTP
+      method
     </p>
 
     <!-- 6 boxes -->

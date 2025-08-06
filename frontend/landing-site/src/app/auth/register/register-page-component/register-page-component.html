@@ -65,7 +65,7 @@
 
         <div class="flex flex-col gap-3">
           <label for="" class="font-medium">Address</label>
-          
+
           <div class="flex flex-col">
             <mat-form-field>
               <mat-label>Street address 1</mat-label>
@@ -107,9 +107,19 @@
       <div class="flex w-full justify-center items-center pt-4">
         <button
           matButton
-          class="!bg-blue-500 hover:!bg-blue-400 !rounded-lg !text-white !font-medium !w-fit !px-8"
+          [disabled]="loading$ | async"
+          class="!rounded-lg !text-white !font-medium !w-32 !px-8"
+          [class]="
+            (loading$ | async)
+              ? '!bg-blue-300'
+              : '!bg-blue-500 hover:!bg-blue-400 '
+          "
         >
-          Register
+          @if (loading$ | async) {
+          <mat-spinner class="custom-spinner !size-6" />
+          } @else {
+          <p>Register</p>
+          }
         </button>
       </div>
     </form>
