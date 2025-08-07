@@ -25,7 +25,16 @@ public class CustomAuthenticationEntryPoint implements ServerAuthenticationEntry
 
     @Override
     public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException ex) {
-        ApiError error = new ApiError(ApiErrorCode.UNAUTHORIZED, ex.getMessage());
+        Throwable errorCause = ex.getCause();
+        String causeMessage = errorCause != null ? errorCause.getMessage() : "";
+        ApiErrorCode code;
+        if (causeMessage.contains("expired")) {
+            code = ApiErrorCode.TOKEN_EXPIRED;
+        } else {
+            code = ApiErrorCode.UNAUTHORIZED;
+        }
+
+        ApiError error = new ApiError(code, ex.getMessage());
         ApiResponse<Object> apiResponse = ApiResponse.error(error);
 
         ServerHttpResponse response = exchange.getResponse();
@@ -36,7 +45,7 @@ public class CustomAuthenticationEntryPoint implements ServerAuthenticationEntry
         try {
             bytes = objectMapper.writeValueAsBytes(apiResponse);
         } catch (JsonProcessingException e) {
-            bytes = "{\"isSuccess\":false,\"error\":{\"code\":\"AUTH_500\",\"message\":\"Serialization error\"}}"
+            bytes = "{\"isSuccess\":false,\"error\":{\"code\":\"INTERNAL_SERVER_ERROR\",\"message\":\"Serialization error\"}}"
                     .getBytes(StandardCharsets.UTF_8);
         }
 

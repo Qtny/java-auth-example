@@ -34,7 +34,7 @@ public class JwtService {
 
     private static final int OTP_JWT_TTL_IN_MINUTES = 5;
     private static final int MFA_JWT_TTL_IN_MINUTES = 5;
-    private static final int USER_JWT_TTL_IN_DAYS = 15;
+    private static final int USER_JWT_TTL_IN_MINUTES = 10;
 
     // generate otp token
     public String generateTransitionalToken(String subject, TokenPurpose purpose) {
@@ -68,7 +68,7 @@ public class JwtService {
              JWTClaimsSet claims = new JWTClaimsSet.Builder()
                      .subject(subject)
                      .issueTime(Date.from(now))
-                     .expirationTime(Date.from(now.plus(USER_JWT_TTL_IN_DAYS, ChronoUnit.DAYS)))
+                     .expirationTime(Date.from(now.plus(USER_JWT_TTL_IN_MINUTES, ChronoUnit.SECONDS)))
                      .claim("type", TokenType.USER)
                      .claim("purpose", purpose)
                      .issuer("auth-service")
@@ -86,40 +86,4 @@ public class JwtService {
              throw new TokenCreationException("user token failed to be created");
          }
     }
-
-//    public Claims parseToken(String token) {
-//        return Jwts.parser()
-//                .verifyWith(getSigningKey())
-//                .build()
-//                .parseSignedClaims(token)
-//                .getPayload();
-//    }
-
-//    public String extractSubject(String token) { return extractClaim(token, Claims::getSubject); };
-//
-//    public <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
-//        final Claims claims = extractAllClaims(token);
-//        return claimResolver.apply(claims);
-//    }
-//
-//    public Claims extractAllClaims(String token) {
-//        return Jwts.parser()
-//                .verifyWith(getSigningKey())
-//                .build()
-//                .parseSignedClaims(token)
-//                .getPayload();
-//    }
-//
-//    public boolean isTokenValid(String token, UserDetails userDetails) {
-//        final String email = extractSubject(token);
-//        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
-//    }
-//
-//    public boolean isTokenExpired(String token) {
-//        return extractTokenExpiration(token).before(new Date());
-//    }
-//
-//    public Date extractTokenExpiration(String token) {
-//        return extractClaim(token, Claims::getExpiration);
-//    }
 }
