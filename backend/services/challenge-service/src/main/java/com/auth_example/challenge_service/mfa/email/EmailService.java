@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -19,6 +20,7 @@ public class EmailService {
     private final TemplateEngine templateEngine;
     private static final String NO_REPLY_EMAIL = "no-reply@auth-example.com";
 
+    @Async
     public void sendOtpEmail(String toEmail, String otp) {
 
         try {
@@ -40,6 +42,7 @@ public class EmailService {
         }
     }
 
+    @Async
     public void sendTotpQrCode(String toEmail, String qrCodeUrl) {
         try {
         MimeMessage message = mailSender.createMimeMessage();

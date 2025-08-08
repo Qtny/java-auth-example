@@ -71,6 +71,35 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(error));
     }
 
+    @ExceptionHandler(RefreshTokenExpiredException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRefreshTokenExpiredException(RefreshTokenExpiredException exception) {
+        ApiError error = new ApiError(TOKEN_ERROR, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(error));
+    }
+    @ExceptionHandler(RefreshTokenMissingException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRefreshTokenMissingException(RefreshTokenMissingException exception) {
+        ApiError error = new ApiError(TOKEN_ERROR, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(error));
+    }
+    @ExceptionHandler(RefreshTokenNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException exception) {
+        ApiError error = new ApiError(TOKEN_ERROR, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(error));
+    }
+    @ExceptionHandler(RefreshTokenRevokedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRefreshTokenRevokedException(RefreshTokenRevokedException exception) {
+        ApiError error = new ApiError(TOKEN_ERROR, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(error));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException
             (MethodArgumentNotValidException exception)

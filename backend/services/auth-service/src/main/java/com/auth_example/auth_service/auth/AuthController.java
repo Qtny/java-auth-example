@@ -3,7 +3,11 @@ package com.auth_example.auth_service.auth;
 import com.auth_example.auth_service.auth.models.*;
 import com.auth_example.auth_service.encryption.EncryptionService;
 import com.auth_example.auth_service.exceptions.MfaNotEnabledException;
+import com.auth_example.auth_service.exceptions.RefreshTokenMissingException;
 import com.auth_example.auth_service.jwt.JwtService;
+import com.auth_example.auth_service.jwt.models.RefreshToken;
+import com.auth_example.auth_service.jwt.models.RefreshTokenRequest;
+import com.auth_example.auth_service.jwt.models.UserToken;
 import com.auth_example.auth_service.mfa.MfaChallengeType;
 import com.auth_example.auth_service.mfa.MfaService;
 import com.auth_example.auth_service.mfa.models.email.EmailValidateResponse;
@@ -16,12 +20,16 @@ import com.auth_example.common_service.core.responses.ApiResponse;
 import com.auth_example.common_service.jwt.TokenPurpose;
 import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
@@ -91,6 +99,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginMfaResponse>> login(@RequestBody @Valid LoginRequest request) {
         // call user to check pw
         User user = userService.validatePassword(request);
+
         // check is mfa enabled
         Mfa userMfa = user.getMfa();
         if (!userMfa.isEnabled()) {
@@ -111,8 +120,34 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PostMapping("/login/email/verify")
-    public ResponseEntity<ApiResponse<LoginResponse>> verifyLoginByEmail(HttpServletRequest httpRequest, @RequestBody @Valid VerifyEmailMfaRequest request) {
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(@CookieValue(name = "refreshToken", required = false) String token) {
+        if (token == null || token.isEmpty()) {
+            throw new RefreshTokenMissingException("refresh token is missing");
+        }
+        // generate user token
+        UserToken userToken = jwtService.renewRefreshToken(token);
+        ResponseCookie responseCookie = ResponseCookie.from("refreshToken", userToken.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/v1/")
+                .sameSite("Strict")
+                .maxAge(Duration.ofDays(15))
+                .build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, responseCookie.toString());
+
+        LoginResponse response = new LoginResponse(userToken.accessToken());
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(ApiResponse.success(response));
+    }
+
+    @PostMapping("/mfa/login/email/verify")
+    public ResponseEntity<ApiResponse<LoginResponse>> verifyLoginByEmail(
+            HttpServletRequest httpRequest,
+            @RequestBody @Valid VerifyEmailMfaRequest request
+    ) {
         // decrypt challenge id
         UUID challengeId = encryptionService.decryptUuid(request.challengeId());
 
@@ -124,10 +159,21 @@ public class AuthController {
         userService.enableMfa(email, mfaResponse.type(), mfaResponse.email());
 
         // generate user token
-        String token = jwtService.generateUserToken(mfaResponse.email(), TokenPurpose.AUTHORIZATION);
+        UserToken userToken = jwtService.generateNewUserToken(email);
+        ResponseCookie responseCookie = ResponseCookie.from("refreshToken", userToken.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/v1/")
+                .sameSite("Strict")
+                .maxAge(Duration.ofDays(15))
+                .build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, responseCookie.toString());
 
-        LoginResponse response = new LoginResponse(token);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        LoginResponse response = new LoginResponse(userToken.accessToken());
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(ApiResponse.success(response));
     }
 
     @PostMapping("/mfa/email/initiate")
@@ -162,7 +208,10 @@ public class AuthController {
     }
 
     @PostMapping("/mfa/login/totp/verify")
-    public ResponseEntity<ApiResponse<LoginResponse>> verifyLoginByTotp(HttpServletRequest httpRequest, @RequestBody @Valid VerifyTotpMfaRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> verifyLoginByTotp(
+            HttpServletRequest httpRequest,
+            @RequestBody @Valid VerifyTotpMfaRequest request
+    ) {
         // get shared secret and qrcode
         String email = httpRequest.getHeader("X-User-Email");
         VerifyTotpMfaResponse mfaResponse = mfaService.verifyTotp(email, request.code());
@@ -171,9 +220,20 @@ public class AuthController {
         userService.enableMfa(email, mfaResponse.type(), "");
 
         // generate user token
-        String token = jwtService.generateUserToken(mfaResponse.email(), TokenPurpose.AUTHORIZATION);
+        UserToken userToken = jwtService.generateNewUserToken(email);
+        ResponseCookie responseCookie = ResponseCookie.from("refreshToken", userToken.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/v1/")
+                .sameSite("Strict")
+                .maxAge(Duration.ofDays(15))
+                .build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, responseCookie.toString());
 
-        LoginResponse response = new LoginResponse(token);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        LoginResponse response = new LoginResponse(userToken.accessToken());
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(ApiResponse.success(response));
     }
 }

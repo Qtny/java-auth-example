@@ -28,7 +28,7 @@ public class MfaService {
     private final MfaClient mfaClient;
     private final RedisService redisService;
     private final UserDtoMapperImpl userMapper;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+    private final PasswordEncoder passwordEncoder;
     ;
 
     public UUID createRegistrationMfa(RegisterRequest request) {

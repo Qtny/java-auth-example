@@ -10,6 +10,7 @@ import com.auth_example.auth_service.users.models.NewUser;
 import com.auth_example.auth_service.users.models.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class UserService {
 
     private final UserClient userClient;
     private final RedisService redisService;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+    private final PasswordEncoder passwordEncoder;
 
     public void checkIfUserEmailExist(String email) {
         boolean isUserEmailExist = userClient.checkIfEmailExist(email);

@@ -9,13 +9,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
-import org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
-import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
@@ -47,7 +46,8 @@ public class SecurityConfig {
                         .pathMatchers(
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
-                                "/api/v1/auth/headers"
+                                "/api/v1/auth/headers",
+                                "/api/v1/auth/refresh-token"
                         )
                         .permitAll()
                         .pathMatchers(
@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .hasRole("OTP")
                         .pathMatchers(
                                 "/api/v1/auth/mfa/email/initiate",
-                                "/api/v1/auth/login/email/verify",
+                                "/api/v1/auth/mfa/login/email/verify",
                                 "/api/v1/auth/mfa/totp/initiate",
                                 "/api/v1/auth/mfa/login/totp/verify"
                         )
@@ -69,14 +69,21 @@ public class SecurityConfig {
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationEntryPoint(authenticationEntryPoint)
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(
-                                        new ReactiveJwtAuthenticationConverterAdapter(
-                                                new CustomAuthenticationConverter()
-                                        )
-                                )
+                        .jwt(jwt -> jwt
+//                                .jwtAuthenticationConverter(
+//                                        new ReactiveJwtAuthenticationConverterAdapter(
+//                                                new CustomAuthenticationConverter()
+//                                        )
+//                                )
+                                .authenticationManager(authenticationManager)
                         )
                 )
                 .build();
+    }
+
+    @Bean
+    public ReactiveJwtDecoder jwtDecoder() {
+        return NimbusReactiveJwtDecoder.withJwkSetUri("http://localhost:8081/.well-known/jwks.json").build();
     }
 
     @Bean
@@ -91,10 +98,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", corsConfig);
 
         return source;
-    }
-
-    @Bean
-    public ServerAuthenticationConverter bearerTokenAuthenticationConverter() {
-        return new ServerBearerTokenAuthenticationConverter();
     }
 }

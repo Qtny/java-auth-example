@@ -36,7 +36,11 @@ public class CustomReactiveAuthenticationManager implements ReactiveAuthenticati
     public Mono<Authentication> authenticate(Authentication authentication) {
         String token = authentication.getCredentials().toString();
 
-        return jwtDecoder.decode(token)
+        Mono<Jwt> decoded = jwtDecoder.decode(token);
+        return decoded.doOnError(e -> {
+                    // Logs the actual exception
+                    System.err.println("JWT Decode error: " + e.getMessage());
+                })
                 .map(jwt -> {
                     String type = jwt.getClaimAsString("type");
                     if (type == null) throw new BadCredentialsException("Missing token type");
@@ -44,7 +48,8 @@ public class CustomReactiveAuthenticationManager implements ReactiveAuthenticati
                     String role = resolveRole(type, jwt);
                     List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
                     return new JwtAuthenticationToken(jwt, authorities, jwt.getSubject());
-                });
+                })
+                ;
     }
 
     private String resolveRole(String typeStr, Jwt jwt) {
