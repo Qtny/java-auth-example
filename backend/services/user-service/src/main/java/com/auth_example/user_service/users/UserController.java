@@ -78,10 +78,10 @@ public class UserController {
     }
 
     @DeleteMapping("/mfa")
-    public ResponseEntity<ApiResponse<String>> removeMfa(HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<Void>> removeMfa(HttpServletRequest httpRequest) {
         String email = httpRequest.getHeader("X-User-Email");
         userService.removeMfa(email);
 
-        return ResponseEntity.ok(ApiResponse.success("mfa successfully removed"));
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

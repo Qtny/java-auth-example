@@ -55,6 +55,14 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(error));
     }
 
+    @ExceptionHandler(RedisException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRedisException(RedisException exception) {
+        ApiError error = new ApiError(INTERNAL_ERROR, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(error));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException
             (MethodArgumentNotValidException exception)

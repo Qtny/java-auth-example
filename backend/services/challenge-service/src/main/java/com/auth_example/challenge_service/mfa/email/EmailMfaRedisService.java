@@ -1,10 +1,13 @@
 package com.auth_example.challenge_service.mfa.email;
 
+import com.auth_example.challenge_service.exceptions.RedisException;
 import com.auth_example.challenge_service.mfa.email.models.EmailMfaChallenge;
 import com.auth_example.challenge_service.redis.BaseRedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -22,9 +25,14 @@ public class EmailMfaRedisService implements BaseRedisService<EmailMfaChallenge>
 
     @Override
     public void storeMfaEntry(EmailMfaChallenge entry, Duration ttl) {
-        log.info("INFO :: storing email mfa entry");
-        emailMfaTemplate.opsForValue().set(CHALLENGE_BY_ID_KEY_PREFIX + entry.id(), entry, ttl);
-        emailMfaTemplate.opsForValue().set(CHALLENGE_BY_EMAIL_KEY_PREFIX + entry.email(), entry, ttl);
+        try {
+            log.info("INFO :: storing email mfa entry");
+            emailMfaTemplate.opsForValue().set(CHALLENGE_BY_ID_KEY_PREFIX + entry.id(), entry, ttl);
+            emailMfaTemplate.opsForValue().set(CHALLENGE_BY_EMAIL_KEY_PREFIX + entry.email(), entry, ttl);
+        } catch (IllegalArgumentException | SerializationException | RedisConnectionFailureException exception) {
+            log.error("[RedisService :: storeMfaEntry] - error has occur : {}", exception.getMessage());
+            throw new RedisException("something went wrong with redis");
+        }
     }
 
     @Override
