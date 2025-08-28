@@ -53,7 +53,7 @@ public class UserControllerTest {
     private MockMvc mockMvc;
     @MockitoBean
     private UserService userService;
-    private ObjectMapper om = new ObjectMapper();
+    private final ObjectMapper om = new ObjectMapper();
 
     private final String mockEmail = "test@example.com";
     private Mfa sampleMfa;
@@ -109,18 +109,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.data[0].email").value(sampleUser.getEmail()))
                 .andExpect(jsonPath("$.data[0].mfaEnabled").value(sampleUser.getMfa().isEnabled()))
                 .andExpect(jsonPath("$.data[0].password").doesNotExist());
-
-//        MvcResult result = mockMvc.perform(get("/api/v1/users").with(internalUseHeader()))
-//                .andExpect(status().isOk())
-//                .andReturn();
-//        String json = result.getResponse().getContentAsString();
-//        ApiResponse<List<UserResponse>> response = om.readValue(json, new TypeReference<ApiResponse<List<UserResponse>>>() {});
-//
-//        assertEquals(1, response.getData().size());
-//        assertEquals(sampleUser.getEmail(), response.getData().get(0).email());
-//        assertEquals(sampleUser.getMfa().isEnabled(), response.getData().get(0).mfaEnabled());
-//        assertNull(response.getError());
-//        assertTrue(response.isSuccess());
     }
 
     @Test
