@@ -1,11 +1,13 @@
 package com.auth_example.challenge_service.mfa.totp;
 
 import com.auth_example.challenge_service.encryption.EncryptionService;
+import com.auth_example.challenge_service.exceptions.ChallengeNotFoundException;
 import com.auth_example.challenge_service.exceptions.CodeDoesNotMatchException;
 import com.auth_example.challenge_service.exceptions.TotpProfileNotFoundException;
 import com.auth_example.challenge_service.mfa.BaseMfaService;
 import com.auth_example.challenge_service.mfa.MfaChallengeType;
 import com.auth_example.challenge_service.mfa.MfaDtoMapperImpl;
+import com.auth_example.challenge_service.mfa.email.models.EmailMfaChallenge;
 import com.auth_example.challenge_service.mfa.totp.models.*;
 import com.auth_example.challenge_service.qrcode.QrCodeService;
 import com.google.zxing.WriterException;
@@ -33,6 +35,7 @@ public class TotpMfaService implements BaseMfaService<
     private final TotpMfaRepository totpRepository;
     private final QrCodeService qrCodeService;
     private final MfaDtoMapperImpl mapper;
+    private final TotpService totpService;
     private final EncryptionService encryptionService;
 
     private static final Duration TIME_STEP = Duration.ofSeconds(30);
@@ -40,7 +43,7 @@ public class TotpMfaService implements BaseMfaService<
 
     @Override
     public MfaChallengeType getType() {
-        return null;
+        return MfaChallengeType.TOTP;
     }
 
     @Override
@@ -53,7 +56,7 @@ public class TotpMfaService implements BaseMfaService<
         }
 
         // generate secret
-        String clientSecret = this.obtainUserSecret(request.email());
+        String clientSecret = totpService.generateNewClientSecret(request.email());
         // generate auth url
         String authUrl = String.format("otpauth://totp/%s:%s?secret=%s&issuer=%s", ISSUER, request.email(), clientSecret, ISSUER);
         // generate qr
@@ -76,7 +79,7 @@ public class TotpMfaService implements BaseMfaService<
         // decrypt secret
         String decryptedSecret = encryptionService.decryptString(profile.getSecret());
 
-        boolean isValid = this.verifyWithSkew(decryptedSecret, request.code(), 2);
+        boolean isValid = totpService.verifyWithSkew(decryptedSecret, request.code(), 2);
         if (!isValid) {
             throw new CodeDoesNotMatchException("totp code does not match");
         }
@@ -85,8 +88,11 @@ public class TotpMfaService implements BaseMfaService<
     }
 
     @Override
-    public TotpProfile findOneById(UUID challengeId) {
-        return null;
+    public TotpProfile findOneById(UUID totpId) {
+        return totpRepository.findById(totpId)
+                .orElseThrow(() ->
+                        new TotpProfileNotFoundException("totp with id " + totpId + " does not exist")
+                );
     }
 
     @Override
@@ -98,27 +104,6 @@ public class TotpMfaService implements BaseMfaService<
     @Override
     public Optional<TotpProfile> findOne(TotpMfaFindByEmailRequest request) {
         return totpRepository.findOneByEmail(request.email());
-    }
-
-    private String obtainUserSecret(String email) {
-        Optional<TotpProfile> profile = totpRepository.findOneByEmail(email);
-        if (profile.isPresent()) {
-            return profile.get().getSecret();
-        } else {
-            // generate random 16 characters base 32 secret
-            return Base32.random();
-        }
-    }
-
-    public boolean verifyWithSkew(String base32Secret, String code, int skew) {
-        long timeIndex = System.currentTimeMillis() / 1000 / 30;
-        for (int i = -skew; i <= skew; i++) {
-            Totp totp = new Totp(base32Secret);
-            if (totp.now().equals(code)) {
-                return true;
-            }
-        }
-        return false;
     }
 }
 

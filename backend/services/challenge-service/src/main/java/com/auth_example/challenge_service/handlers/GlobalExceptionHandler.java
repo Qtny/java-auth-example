@@ -55,8 +55,32 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(error));
     }
 
+    @ExceptionHandler(EncryptionException.class)
+    public ResponseEntity<ApiResponse<Void>> handleEncryptionException(EncryptionException exception) {
+        ApiError error = new ApiError(INTERNAL_ERROR, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(error));
+    }
+
     @ExceptionHandler(RedisException.class)
     public ResponseEntity<ApiResponse<Void>> handleRedisException(RedisException exception) {
+        ApiError error = new ApiError(INTERNAL_ERROR, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(error));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException exception) {
+        ApiError error = new ApiError(INTERNAL_ERROR, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(error));
+    }
+
+    @ExceptionHandler(InvalidSkewException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidSkewException(InvalidSkewException exception) {
         ApiError error = new ApiError(INTERNAL_ERROR, exception.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

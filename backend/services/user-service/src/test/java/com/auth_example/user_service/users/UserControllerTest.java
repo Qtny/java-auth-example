@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -104,7 +105,7 @@ public class UserControllerTest {
         mockMvc.perform(get("/api/v1/users").with(internalUseHeader()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.error").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.error").value(nullValue()))
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data[0].email").value(sampleUser.getEmail()))
                 .andExpect(jsonPath("$.data[0].mfaEnabled").value(sampleUser.getMfa().isEnabled()))
@@ -121,7 +122,7 @@ public class UserControllerTest {
         mockMvc.perform(get("/api/v1/users").with(internalUseHeader()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.error").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.error").value(nullValue()))
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data").isEmpty());
     }
@@ -136,7 +137,7 @@ public class UserControllerTest {
         mockMvc.perform(get("/api/v1/users/email/" + mockEmail).with(internalUseHeader()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.error").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.error").value(nullValue()))
                 .andExpect(jsonPath("$.data.email").value(sampleUser.getEmail()))
                 .andExpect(jsonPath("$.data.mfaEnabled").value(sampleUser.getMfa().isEnabled()))
                 .andExpect(jsonPath("$.data.password").doesNotExist());
@@ -150,7 +151,7 @@ public class UserControllerTest {
         // act
         mockMvc.perform(get("/api/v1/users/email/" + mockEmail).with(internalUseHeader()))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value(ApiErrorCode.ENTITY_NOT_FOUND.name()));
     }
@@ -164,7 +165,7 @@ public class UserControllerTest {
         mockMvc.perform(get("/api/v1/users/email/" + mockEmail + "/raw").with(internalUseHeader()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.error").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.error").value(nullValue()))
                 .andExpect(jsonPath("$.data.id").value(sampleUser.getId().toString()))
                 .andExpect(jsonPath("$.data.email").value(sampleUser.getEmail()))
                 .andExpect(jsonPath("$.data.password").value(sampleUser.getPassword()));
@@ -178,7 +179,7 @@ public class UserControllerTest {
         // act
         mockMvc.perform(get("/api/v1/users/email/" + mockEmail + "/raw").with(internalUseHeader()))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value(ApiErrorCode.ENTITY_NOT_FOUND.name()));
     }
@@ -192,7 +193,7 @@ public class UserControllerTest {
         mockMvc.perform(get("/api/v1/users/email/" + mockEmail + "/exist").with(internalUseHeader()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.error").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.error").value(nullValue()))
                 .andExpect(jsonPath("$.data").value(true));
     }
 
@@ -205,7 +206,7 @@ public class UserControllerTest {
         mockMvc.perform(get("/api/v1/users/email/" + mockEmail + "/exist").with(internalUseHeader()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.error").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.error").value(nullValue()))
                 .andExpect(jsonPath("$.data").value(false));
     }
 
@@ -223,7 +224,7 @@ public class UserControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.error").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.error").value(nullValue()))
                 .andExpect(jsonPath("$.data.email").value(sampleUser.getEmail()))
                 .andExpect(jsonPath("$.data.mfaEnabled").value(sampleUser.getMfa().isEnabled()))
                 .andExpect(jsonPath("$.data.password").doesNotExist());
@@ -237,7 +238,7 @@ public class UserControllerTest {
         // act
         mockMvc.perform(get("/api/v1/users/email/" + mockEmail + "/raw").with(internalUseHeader()))
                 .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value(ApiErrorCode.METHOD_NOT_ALLOWED.name()));
     }
@@ -253,7 +254,7 @@ public class UserControllerTest {
                         .content(om.writeValueAsString(invalidRequests))
                 )
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value(ApiErrorCode.VALIDATION_ERROR.name()));
     }
@@ -293,8 +294,8 @@ public class UserControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.error").value(Matchers.nullValue()))
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()));
+                .andExpect(jsonPath("$.error").value(nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()));
     }
 
     @ParameterizedTest
@@ -308,7 +309,7 @@ public class UserControllerTest {
                         .content(om.writeValueAsString(invalidRequests))
                 )
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value(ApiErrorCode.VALIDATION_ERROR.name()));
     }
@@ -335,7 +336,7 @@ public class UserControllerTest {
                         .content(om.writeValueAsString(mockRequest))
                 )
                 .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value(ApiErrorCode.METHOD_NOT_ALLOWED.name()));
     }
@@ -353,7 +354,7 @@ public class UserControllerTest {
                         .content(om.writeValueAsString(mockRequest))
                 )
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value(ApiErrorCode.ENTITY_NOT_FOUND.name()));
     }
@@ -367,8 +368,8 @@ public class UserControllerTest {
         mockMvc.perform(delete("/api/v1/users/mfa").with(internalUseHeader()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.error").value(Matchers.nullValue()))
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()));
+                .andExpect(jsonPath("$.error").value(nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()));
     }
 
     @Test
@@ -382,7 +383,7 @@ public class UserControllerTest {
                         .header("X-User-Email", "")
                 )
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value(ApiErrorCode.ENTITY_NOT_FOUND.name()));
     }
@@ -398,7 +399,7 @@ public class UserControllerTest {
                         .header("X-User-Email", mockEmail)
                 )
                 .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value(ApiErrorCode.METHOD_NOT_ALLOWED.name()));
     }

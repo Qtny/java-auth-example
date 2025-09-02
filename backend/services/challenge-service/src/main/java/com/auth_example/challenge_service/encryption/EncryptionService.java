@@ -1,5 +1,6 @@
 package com.auth_example.challenge_service.encryption;
 
+import com.auth_example.challenge_service.exceptions.EncryptionException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -57,8 +58,8 @@ public class EncryptionService {
             // encode combine byte array to URL-safe base64 string without padding
             return Base64.getUrlEncoder().withoutPadding().encodeToString(encryptedData);
         } catch (Exception e) {
-            log.error("failed to encrypt data");
-            throw new IllegalStateException("encryption failed", e);
+            log.error("failed to encrypt data: {}", e.getMessage());
+            throw new EncryptionException("encryption failed");
         }
     }
 
@@ -82,8 +83,8 @@ public class EncryptionService {
             byte[] plainTextBytes = cipher.doFinal(cipherText);
             return new String(plainTextBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            log.error("failed to decrypt data");
-            throw new IllegalStateException("decryption failed", e);
+            log.error("failed to decrypt data: {}", e.getMessage());
+            throw new EncryptionException("decryption failed");
         }
     }
 }
