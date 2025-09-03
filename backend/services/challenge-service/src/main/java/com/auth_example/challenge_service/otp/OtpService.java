@@ -13,6 +13,7 @@ public class OtpService {
 
     public String generateOtp(int length) {
         log.info("INFO :: generating OTP code");
+
         if (length == 0) {
             throw new IllegalArgumentException("otp length must be more than 0");
         }

@@ -1,19 +1,16 @@
 package com.auth_example.challenge_service.mfa.totp;
 
+import com.auth_example.challenge_service.exceptions.InvalidSkewException;
 import org.jboss.aerogear.security.otp.Totp;
 import org.jboss.aerogear.security.otp.api.Clock;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
 public class TotpServiceTest {
@@ -71,5 +68,16 @@ public class TotpServiceTest {
         boolean functionCall = totpService.verifyWithSkew(CLIENT_SECRET, mockCode, SKEW);
         // assert
         assertFalse(functionCall);
+    }
+
+    @Test
+    @DisplayName("[TotpService :: verifyWithSkew] - should throw [InvalidSkewException] if an invalid skew is given")
+    public void shouldThrowInvalidSkewExceptionIfSkewIsInvalid() {
+        // arrange
+        Totp mockTotp = new Totp(CLIENT_SECRET);
+        String mockCode = mockTotp.now();
+        // act
+        // assert
+        assertThrows(InvalidSkewException.class, () -> totpService.verifyWithSkew(CLIENT_SECRET, mockCode, 0));
     }
 }

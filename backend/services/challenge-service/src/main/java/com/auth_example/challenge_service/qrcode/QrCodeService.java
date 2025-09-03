@@ -6,6 +6,7 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.parameters.P;
@@ -18,14 +19,20 @@ import java.io.IOException;
 import java.util.Base64;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class QrCodeService {
+
+    private final MultiFormatWriter multiFormatWriter;
+
+    public QrCodeService() {
+        this.multiFormatWriter = new MultiFormatWriter();
+    }
 
     public String generateForBase64(String authUrl) {
         try {
             // generate a 200x200 qr code matrix from uri
-            BitMatrix bitMatrix = new MultiFormatWriter().encode(authUrl, BarcodeFormat.QR_CODE, 200, 200);
+            BitMatrix bitMatrix = multiFormatWriter.encode(authUrl, BarcodeFormat.QR_CODE, 200, 200);
             // convert bit matrix to buffered image
             BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
             // convert buffered image to byte array output stream (png format)
